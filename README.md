@@ -1,6 +1,6 @@
 # 🎓 AI Presentation Agent
 
-> **AI-powered presentation generator for the "AI Explained by a UX Designer" course.**
+> **AI-powered presentation generator for the "AI Presentation Agent" course.**
 > Paste your episode content → a team of AI Agents structures, designs, and generates a beautiful interactive HTML presentation.
 
 ---
@@ -128,4 +128,4 @@ MIT — free to use, modify, and sell.
 
 ## 👤 Author
 
-Made with ❤️ by **AI Explained by a UX Designer**
+Made with ❤️ by **AI Presentation Agent**

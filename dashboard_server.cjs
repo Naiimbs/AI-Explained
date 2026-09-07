@@ -156,7 +156,7 @@ async function generatePresentationHtml(payload) {
       <div class="reveal">
         <div class="hero-badge">
           <span style="color:var(--brain);">🎓</span>
-          <span style="font-weight:700;">AI Explained by a UX Designer</span>
+          <span style="font-weight:700;">AI Presentation Agent</span>
           <span style="padding:.1rem .6rem;background:var(--tool-muted);color:var(--tool);border-radius:var(--r-pill);font-size:.75rem;font-weight:700;">EP ${epNum}</span>
         </div>
       </div>
@@ -279,7 +279,7 @@ async function generatePresentationHtml(payload) {
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>${title} — الحلقة ${epNum}</title>
-  <meta name="description" content="${title} — AI Explained by a UX Designer, Episode ${epNum}"/>
+  <meta name="description" content="${title} — AI Presentation Agent, Episode ${epNum}"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -551,8 +551,8 @@ function generateAndWriteIndex(opts = {}) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Explained by a UX Designer — Course Index</title>
-    <meta name="description" content="Complete course index for AI Explained by a UX Designer — interactive presentations">
+    <title>AI Presentation Agent — Course Index</title>
+    <meta name="description" content="Complete course index for AI Presentation Agent — interactive presentations">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root{--bg:#f8fafc;--tp:#0f172a;--ts:#475569;--tool:#0284c7;--tool-light:#38bdf8;--brain:#7c3aed;--sh-lg:0 20px 25px -5px rgba(0,0,0,0.05),0 10px 10px -5px rgba(0,0,0,0.02);--sh-md:0 10px 15px -3px rgba(0,0,0,0.05),0 4px 6px -2px rgba(0,0,0,0.025);}
@@ -581,7 +581,7 @@ function generateAndWriteIndex(opts = {}) {
 <body>
     <div class="container">
         <div class="hero">
-            <h1>🎓 AI Explained by a UX Designer</h1>
+            <h1>🎓 AI Presentation Agent</h1>
             <p style="color:var(--ts);font-size:1.1rem;max-width:600px;margin:0 auto;">Complete course index — ${files.length} episode${files.length !== 1 ? 's' : ''} available</p>
             ${iName ? `
             <div class="instructor-badge">
