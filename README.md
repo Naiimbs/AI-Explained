@@ -128,4 +128,4 @@ MIT — free to use, modify, and sell.
 
 ## 👤 Author
 
-Made with ❤️ by **AI Presentation Agent**
+Made with ❤️ by **Naiim BSILI**
