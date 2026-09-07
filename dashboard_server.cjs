@@ -6,7 +6,7 @@ const path = require('path');
 const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const PRESENTATIONS_DIR = path.join(__dirname, 'presentations');
 
 // Initialize Gemini (needs GEMINI_API_KEY env var)
@@ -17,6 +17,11 @@ app.use(express.json());
 app.use(express.static(__dirname));
 // Also serve presentations directory statically
 app.use('/presentations', express.static(PRESENTATIONS_DIR));
+
+// Root redirect to dashboard
+app.get('/', (req, res) => {
+    res.redirect('/dashboard.html');
+});
 
 // Ensure presentations dir exists
 if (!fs.existsSync(PRESENTATIONS_DIR)) {

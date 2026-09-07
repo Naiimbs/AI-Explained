@@ -17,17 +17,44 @@
 
 ---
 
-## ⚡ Try Demo Mode (No API Key Required)
+## 🌐 Live Demo & Free Hosting
 
-Want to test the app immediately without configuring an API key?
+You can deploy and test this app for **free** on **Render.com**, **Koyeb**, or **Vercel**!
+
+### 🔗 Try the Live Demo
+> 📌 **Live URL**: `https://ai-explained.onrender.com` *(Connect your repository on Render to get your own live URL)*
+
+In the live web app, users can click **`✨ Try Demo (No API Key)`** to immediately test the full multi-agent pipeline live in the browser without configuring anything.
+
+---
+
+## ⚡ Try Demo Mode Locally (No API Key Required)
+
+Want to test the app locally without configuring an API key?
 
 1. Start the server:
    ```bash
    node dashboard_server.cjs
    ```
-2. Open `http://localhost:3000/dashboard.html` in your browser.
+2. Open `http://localhost:3000` or `http://localhost:3000/dashboard.html` in your browser.
 3. Click the **`✨ Try Demo (No API Key)`** button next to the submit button.
 4. Watch the multi-agent workflow simulate in real-time and open your instant presentation!
+
+---
+
+## ☁️ How to Host for Free (Step-by-Step)
+
+### Option 1: Render.com (Recommended for Node.js Express)
+1. Push your repository to GitHub.
+2. Sign up at [Render.com](https://render.com) (Free tier).
+3. Click **New +** → **Web Service**.
+4. Select your repository `AI-Explained`.
+5. Fill in the settings:
+   - **Environment**: `Node`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node dashboard_server.cjs`
+6. *(Optional)* Under **Environment Variables**, add `GEMINI_API_KEY` (if omitted, the app runs fine in Demo Mode).
+7. Click **Create Web Service** — Render will give you a free HTTPS live link (e.g., `https://your-app-name.onrender.com`) to share with users!
 
 ---
 
