@@ -1,27 +1,42 @@
-# 🎓 AI Presentation Agent
+# 🚀 AI Presentation Agent
 
-> **AI-powered presentation generator for the "AI Presentation Agent" course.**
-> Paste your episode content → a team of AI Agents structures, designs, and generates a beautiful interactive HTML presentation.
+> **AI-powered presentation generator.**
+> Paste your episode content — a team of AI Agents structures, designs, and generates a beautiful interactive HTML presentation.
 
 ---
 
 ## ✨ Features
 
-- 🤖 **Real AI generation** — Uses Google Gemini (`gemini-2.5-flash`) to intelligently parse and structure content into slides
-- 🎨 **Premium design** — Glassmorphism cards, Outfit/IBM Plex typography, smooth animations, RTL Arabic support
-- 📜 **Presenter Script** — Built-in slide-synced script panel (press `S` to toggle)
-- 📚 **Auto Course Index** — Automatically generates and updates the course cover page
-- 🧩 **Multi-Agent Pipeline** — Simulates a real orchestrator → collector → structurer → designer → QA workflow
-- 🌐 **Multi-language** — Supports Arabic (`Ar`), English (`En`), or bilingual (`Ar+En`)
+- 🤖 **Real AI Generation** — Uses Google Gemini (`gemini-2.5-flash`) to parse and structure content into slides.
+- ⚡ **Instant Demo Mode** — Try the complete app without needing a Gemini API key.
+- 🎨 **Premium Design** — Glassmorphism cards, Outfit/IBM Plex typography, smooth animations, RTL Arabic support.
+- 📝 **Presenter Script** — Built-in slide-synced script panel (press `S` to toggle).
+- 📚 **Auto Cover Page** — Automatically generates and updates an index linking all presentations.
+- 🔄 **Multi-Agent Pipeline** — Simulates a real orchestrator → collector → structurer → designer → QA workflow.
+- 🌐 **Multi-Language** — Supports Arabic (`Ar`), English (`En`), or bilingual (`Ar+En`).
 
 ---
 
-## 🚀 Getting Started
+## ⚡ Try Demo Mode (No API Key Required)
 
-### 1. Clone the repo
+Want to test the app immediately without configuring an API key?
+
+1. Start the server:
+   ```bash
+   node dashboard_server.cjs
+   ```
+2. Open `http://localhost:3000/dashboard.html` in your browser.
+3. Click the **`✨ Try Demo (No API Key)`** button next to the submit button.
+4. Watch the multi-agent workflow simulate in real-time and open your instant presentation!
+
+---
+
+## 🚀 Getting Started (Full Setup)
+
+### 1. Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-presentation-agent.git
-cd ai-presentation-agent
+git clone https://github.com/Naiimbs/AI-Explained.git
+cd AI-Explained
 ```
 
 ### 2. Install dependencies
@@ -29,18 +44,15 @@ cd ai-presentation-agent
 npm install
 ```
 
-### 3. Configure your API key
+### 3. Configure your API Key (Optional for Demo Mode)
 ```bash
-# Copy the example file
+# Copy the example environment file
 cp .env.example .env
-
-# Open .env and add your Gemini API key
-# Get one free at: https://aistudio.google.com/app/apikey
 ```
 
-Edit `.env`:
-```
-GEMINI_API_KEY=your_key_here
+Edit `.env` and add your free Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey):
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 4. Start the server
@@ -55,54 +67,52 @@ http://localhost:3000/dashboard.html
 
 ---
 
-## 🧠 How It Works
+## 🔄 How It Works
 
 ```
 Your Content (text/paste)
         │
         ▼
-  ┌─────────────────┐
-  │  Collector Agent │  — Reads and cleans raw input
-  └─────────────────┘
+┌───────────────────────┐
+│   Collector Agent     │  - Reads and cleans raw input
+└───────────────────────┘
         │
         ▼
-  ┌──────────────────┐
-  │ Structurer Agent  │  — Sends to Gemini AI → Returns structured JSON
-  └──────────────────┘
+┌───────────────────────┐
+│   Structurer Agent    │  - Sends to Gemini AI → Returns structured JSON
+└───────────────────────┘
         │
         ▼
-  ┌──────────────────┐
-  │  HTML Architect   │  — Maps JSON sections to slide templates
-  └──────────────────┘
+┌───────────────────────┐
+│   HTML Architect      │  - Maps JSON sections to slide templates
+└───────────────────────┘
         │
         ▼
-  ┌──────────────────┐
-  │   UI Designer     │  — Applies design system (CSS tokens, glassmorphism)
-  └──────────────────┘
+┌───────────────────────┐
+│     UI Designer       │  - Applies design system (CSS tokens, glassmorphism)
+└───────────────────────┘
         │
         ▼
-  ┌──────────────────┐
-  │   Visual QA       │  — Verifies and finalizes the file
-  └──────────────────┘
+┌───────────────────────┐
+│     Visual QA         │  - Verifies and finalizes output
+└───────────────────────┘
         │
         ▼
-  presentation-YourTitle.html ✅
+presentation-YourTitle.html 🚀
 ```
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
 ```
-├── dashboard.html           # Main UI — submit content, view live progress
-├── dashboard_server.cjs     # Express server + Gemini AI + route handlers
-├── presentations/           # All generated presentations live here
-│   ├── index.html           # Auto-generated course index
-│   └── presentation-*.html  # Episode presentations
-├── .agents/
-│   └── rules/               # Agent behavior definitions (markdown)
-├── .env                     # Your secrets (not committed to Git)
-├── .env.example             # Template for new users
+├── dashboard.html           # Main UI - submit content, try demo, view progress
+├── dashboard_server.cjs     # Express server + Gemini AI + API handlers
+├── presentations/           # Generated presentation files
+│   ├── index.html           # Auto-generated cover page
+│   └── presentation-*.html  # Generated interactive slides
+├── .agents/                 # Agent rules and behavior definitions
+├── .env.example             # Environment variables template
 └── package.json
 ```
 
