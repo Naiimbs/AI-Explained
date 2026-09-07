@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────
+# Dependencies
+# ─────────────────────────────────────────
+node_modules/
+
+# ─────────────────────────────────────────
+# Environment & Secrets — NEVER commit these
+# ─────────────────────────────────────────
+.env
+
+# ─────────────────────────────────────────
+# Generated Presentations (optional: remove
+# if you want to track them in Git)
+# ─────────────────────────────────────────
+presentations/index.html
+presentations/presentation-Test-*.html
+
+# ─────────────────────────────────────────
+# OS & Editor clutter
+# ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

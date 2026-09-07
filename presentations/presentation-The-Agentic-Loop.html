@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>The Agentic Loop: كيفاش الـAgent يقرر الخطوة الجاية؟ — الحلقة 04</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── CLEAR DESIGN: High Contrast & Modern ── */
+    :root{
+      /* Typography */
+      --font-sans: "IBM Plex Sans Arabic", "IBM Plex Sans", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+      
+      /* Background Scale */
+      --bg:          #ffffff;
+      --bg-1:        #f8fafc;
+      --bg-2:        #f1f5f9;
+      --bg-3:        #e2e8f0;
+
+      /* Surfaces */
+      --border-light: rgba(0,0,0,0.06);
+      --border-med:   rgba(0,0,0,0.12);
+      --border-dark:  rgba(0,0,0,0.22);
+      --card-bg:      #ffffff;
+
+      /* Theme Colors */
+      --tool:        #0284c7; /* Sky / Cyan for Tools */
+      --tool-muted:  rgba(2,132,199,0.08);
+      --tool-light:  #38bdf8;
+
+      --brain:       #7c3aed; /* Purple for AI Brain / LLM */
+      --brain-muted: rgba(124,58,237,0.08);
+      --brain-light: #a78bfa;
+
+      --app:         #059669; /* Emerald for App / System execution */
+      --app-muted:   rgba(5,150,105,0.08);
+
+      --danger:      #dc2626;
+      --danger-m:    rgba(220,38,38,0.08);
+
+      --warning:     #d97706;
+      --warning-m:   rgba(217,119,6,0.08);
+
+      /* Typography */
+      --tp:  #0f172a; /* Slate 900 */
+      --ts:  #475569; /* Slate 600 */
+      --tm:  #64748b; /* Slate 500 */
+
+      /* Spacing (8px grid) */
+      --s2:  0.5rem;   /* 8px  */
+      --s3:  0.75rem;  /* 12px */
+      --s4:  1rem;     /* 16px */
+      --s5:  1.25rem;  /* 20px */
+      --s6:  1.5rem;   /* 24px */
+      --s8:  2rem;     /* 32px */
+      --s10: 2.5rem;   /* 40px */
+      --s12: 3rem;     /* 48px */
+
+      /* Radius */
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-lg:  16px;
+      --r-xl:  24px;
+      --r-pill:999px;
+
+      /* Shadows */
+      --sh-sm:  0 1px 3px rgba(0,0,0,0.05);
+      --sh-md:  0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.04);
+      --sh-lg:  0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+
+      /* Motion */
+      --ease:  cubic-bezier(.4,0,.2,1);
+      --tr:    .25s var(--ease);
+    }
+
+    /* ── Reset ── */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px}
+    body{
+      font-family:var(--font-sans);
+      background:var(--bg);
+      color:var(--tp);
+      line-height:1.75;
+      overflow:hidden; /* FIXED SLIDE DECK ENGINE */
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    /* ── Typography Scale ── */
+    .t-display{
+      font-family:'Outfit',sans-serif;
+      font-size:clamp(2.3rem,6.5vw,4.2rem);
+      font-weight:900;line-height:1.08;letter-spacing:-.02em;
+    }
+    .t-h1{
+      font-family:'Outfit',sans-serif;
+      font-size:clamp(1.7rem,4.5vw,2.4rem);
+      font-weight:800;line-height:1.2;letter-spacing:-.01em;
+    }
+    .t-h2{
+      font-family:'Outfit',sans-serif;
+      font-size:clamp(1.2rem,2.8vw,1.6rem);
+      font-weight:700;line-height:1.3;
+    }
+    .t-h3{
+      font-family:'Outfit',sans-serif;
+      font-size:1.05rem;font-weight:700;line-height:1.35;
+    }
+    .t-body{font-size:.95rem;line-height:1.75;}
+    .t-sm{font-size:.84rem;line-height:1.6;}
+    .t-xs{font-size:.72rem;line-height:1.5;}
+    .t-label{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}
+    .t-mono{font-family:var(--font-mono);font-size:.82rem;}
+
+    /* ── Slide Layout ── */
+    .slide{
+      position:absolute;
+      top:0;left:0;width:100vw;height:100vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      display:flex;flex-direction:column;
+      padding:calc(var(--s10) + 20px) var(--s6) var(--s12);
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transition:opacity 0.5s var(--ease), visibility 0.5s;
+      z-index:1;
+    }
+    .slide.active{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+      z-index:10;
+    }
+    .con{max-width:1080px;width:100%;margin:auto;}
+
+    /* ── Card Base ── */
+    .gc{
+      background:var(--card-bg);
+      border:1px solid var(--border-light);
+      border-radius:var(--r-lg);
+      padding:var(--s8);
+      box-shadow:var(--sh-sm);
+      transition:transform var(--tr), border-color var(--tr), box-shadow var(--tr);
+    }
+    .gc:hover{
+      transform:translateY(-2px);
+      border-color:var(--border-med);
+      box-shadow:var(--sh-md);
+    }
+
+    /* ── NAV BAR ── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      padding:var(--s3) var(--s6);
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s2);
+      background:rgba(255,255,255,0.92);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border-light);
+    }
+    .nlogo{
+      font-family:'Outfit',sans-serif;
+      font-size:.78rem;font-weight:900;
+      color:var(--tool);letter-spacing:.08em;text-transform:uppercase;
+      display:flex;align-items:center;gap:.4rem;
+    }
+    .npills{display:flex;gap:var(--s2);flex-wrap:wrap;}
+    .np{
+      padding:.22rem .65rem;
+      border-radius:var(--r-pill);
+      font-size:.67rem;font-weight:600;
+      border:1px solid transparent;
+      background:var(--bg-1);color:var(--ts);
+      transition:all var(--tr);
+      text-decoration:none;
+      cursor:pointer;
+    }
+    .np:hover{background:var(--bg-2);color:var(--tp);border-color:var(--border-med);}
+    .np.current{background:var(--tool-muted);color:var(--tool);border-color:var(--tool-light);font-weight:700;}
+    .nep{font-size:.7rem;color:var(--tm);font-weight:600;}
+
+    /* ── Section Header ── */
+    .sh{text-align:center;margin-bottom:var(--s8);}
+    .stag{
+      display:inline-flex;align-items:center;gap:.35rem;
+      padding:.25rem .75rem;border-radius:var(--r-pill);
+      font-size:.68rem;font-weight:700;letter-spacing:.08em;
+      text-transform:uppercase;margin-bottom:var(--s3);
+    }
+    .st-tool{background:var(--tool-muted);color:var(--tool);border:1px solid rgba(2,132,199,0.2);}
+    .st-brain{background:var(--brain-muted);color:var(--brain);border:1px solid rgba(124,58,237,0.2);}
+    .st-app{background:var(--app-muted);color:var(--app);border:1px solid rgba(5,150,105,0.2);}
+    .st-warn{background:var(--warning-m);color:var(--warning);border:1px solid rgba(217,119,6,0.2);}
+
+    /* ── Staggered Animations ── */
+    .reveal{
+      opacity:0;
+      transform:translateY(16px);
+      transition:opacity 0.5s var(--ease), transform 0.5s var(--ease);
+    }
+    .reveal.visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* ── Grid Layouts ── */
+    .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--s6);}
+    .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--s6);}
+    .g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--s4);}
+
+    /* ── Hero Slide Specifics ── */
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:var(--bg-1);border:1px solid var(--border-med);
+      padding:.35rem 1rem;border-radius:var(--r-pill);
+      font-size:.8rem;color:var(--ts);font-weight:600;margin-bottom:var(--s4);
+    }
+
+    /* ── Tool Pill Tag ── */
+    .tool-tag{
+      display:inline-flex;align-items:center;gap:.4rem;
+      font-family:var(--font-mono);font-size:.8rem;font-weight:700;
+      background:var(--tool-muted);color:var(--tool);padding:.3rem .75rem;
+      border-radius:var(--r-pill);border:1px solid rgba(2,132,199,0.2);
+    }
+
+    /* ── Comparison Columns ── */
+    .cmp-col{
+      background:var(--bg-1);border:1px solid var(--border-light);
+      border-radius:var(--r-lg);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s4);
+    }
+    .cmp-col.highlight{
+      border-color:var(--tool-light);background:#ffffff;
+      box-shadow:0 8px 24px rgba(2,132,199,0.08);
+    }
+
+    /* ── Flow Diagram ── */
+    .flow-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--s2);
+      margin: var(--s4) 0;
+      direction: ltr;
+    }
+    .flow-box {
+      background: var(--bg-1);
+      border: 1px solid var(--tool);
+      padding: var(--s3) var(--s6);
+      border-radius: var(--r-md);
+      font-weight: 700;
+      text-align: center;
+      width: 250px;
+    }
+    .flow-box.highlight {
+      background: var(--tool);
+      color: #fff;
+    }
+    .flow-arrow {
+      color: var(--ts);
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    /* ── UX Progress ── */
+    .ux-progress {
+      background: var(--bg-1);
+      padding: var(--s4);
+      border-radius: var(--r-md);
+      font-family: var(--font-mono);
+      direction: ltr;
+      text-align: left;
+      border: 1px solid var(--border-med);
+    }
+    .ux-progress .done { color: var(--app); margin-bottom: 0.5rem;}
+    .ux-progress .waiting { color: var(--warning); font-weight: 700; }
+
+    /* ── Interactive Prototype Controls ── */
+    .btn-action{
+      background:var(--tool);color:#fff;border:none;padding:.6rem 1.2rem;
+      border-radius:var(--r-pill);font-family:var(--font-sans);font-weight:600;
+      font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;
+      transition:all var(--tr);
+    }
+    .btn-action:hover{background:var(--tool-light);transform:translateY(-1px);box-shadow:0 4px 12px rgba(2,132,199,0.3);}
+    .btn-reset{
+      background:transparent;color:var(--ts);border:1px solid var(--border-med);
+      padding:.5rem 1rem;border-radius:var(--r-pill);font-family:var(--font-sans);
+      font-size:.8rem;cursor:pointer;transition:all var(--tr);
+    }
+    .btn-reset:hover{background:var(--bg-2);color:var(--tp);}
+
+    /* ── Bottom Deck Controls ── */
+    .deck-controls{
+      position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:90;
+      display:flex;align-items:center;gap:.6rem;
+      background:rgba(255,255,255,0.92);padding:.35rem .75rem;
+      border-radius:var(--r-pill);border:1px solid var(--border-med);
+      box-shadow:0 4px 16px rgba(0,0,0,0.08);backdrop-filter:blur(8px);
+    }
+    .ctrl-btn{
+      width:32px;height:32px;border-radius:var(--r-pill);border:none;
+      background:var(--bg-1);color:var(--tp);display:flex;align-items:center;
+      justify-content:center;font-size:.9rem;cursor:pointer;transition:all var(--tr);
+    }
+    .ctrl-btn:hover{background:var(--tool);color:#fff;}
+    .deck-counter{font-size:.75rem;font-weight:700;color:var(--tm);padding:0 .4rem;}
+
+    /* ── Footer ── */
+    footer{
+      position:fixed;bottom:0;left:0;right:0;z-index:80;
+      padding:.3rem var(--s6);background:rgba(255,255,255,0.85);
+      border-top:1px solid var(--border-light);
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:.65rem;color:var(--tm);pointer-events:none;
+    }
+    footer span{font-weight:600;color:var(--ts);}
+
+    /* ── SCRIPT / TELEPROMPTER PANEL ── */
+    .script-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 250;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s var(--ease);
+    }
+    .script-backdrop.open{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .script-panel{
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(520px, 94vw);
+      height: 100vh;
+      background: #ffffff;
+      border-left: 1px solid var(--border-med);
+      box-shadow: -10px 0 35px rgba(0,0,0,0.12);
+      z-index: 260;
+      transform: translateX(105%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+    }
+    .script-panel.open{
+      transform: translateX(0);
+    }
+    .script-header{
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-1);
+    }
+    .script-title{
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 800;
+      font-size: .95rem;
+      color: var(--tp);
+    }
+    .script-shortcut-hint{
+      background: var(--bg-2);
+      border: 1px solid var(--border-med);
+      padding: .15rem .45rem;
+      border-radius: var(--r-sm);
+      font-size: .68rem;
+      color: var(--tm);
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    .script-actions{
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .script-btn{
+      background: transparent;
+      border: 1px solid var(--border-light);
+      border-radius: var(--r-sm);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .8rem;
+      color: var(--ts);
+      cursor: pointer;
+      transition: all var(--tr);
+    }
+    .script-btn:hover{
+      background: var(--bg-2);
+      color: var(--tp);
+      border-color: var(--border-med);
+    }
+    .script-btn.close-btn{
+      font-size: 1.1rem;
+      color: var(--tm);
+    }
+    .script-btn.close-btn:hover{
+      color: var(--danger);
+      background: var(--danger-m);
+      border-color: rgba(220,38,38,0.2);
+    }
+    .script-content{
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.85;
+      color: var(--tp);
+      scroll-behavior: smooth;
+    }
+    .script-section{
+      padding: .85rem 1rem;
+      border-radius: var(--r-md);
+      margin-bottom: 1.25rem;
+      border-right: 3px solid transparent;
+      background: transparent;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .script-section:hover{
+      background: var(--bg-1);
+    }
+    .script-section.active-section{
+      background: var(--tool-muted);
+      border-right-color: var(--tool);
+      box-shadow: var(--sh-sm);
+    }
+    .script-sec-badge{
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--tool);
+      background: rgba(2,132,199,0.08);
+      padding: .15rem .5rem;
+      border-radius: var(--r-sm);
+      margin-bottom: .6rem;
+      letter-spacing: .05em;
+    }
+    .script-text{
+      white-space: pre-line;
+      color: var(--tp);
+      font-size: inherit;
+    }
+
+    @media (max-width: 768px) {
+      .npills{display:none;}
+      .slide{padding-top:70px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVIGATION BAR ── -->
+<nav>
+  <div class="nlogo">
+    <span>🤖</span>
+    <span>AI Explained by a UX Designer</span>
+  </div>
+  <div class="npills">
+    <button class="np" data-index="0">00. المدخل</button>
+    <button class="np" data-index="1">01. التذكير</button>
+    <button class="np" data-index="2">02. المفهوم الأساسي</button>
+    <button class="np" data-index="3">03. المخطط (Diagram)</button>
+    <button class="np" data-index="4">04. مثال واقعي</button>
+    <button class="np" data-index="5">05. مقارنة (Workflow)</button>
+    <button class="np" data-index="6">06. الفشل (Errors)</button>
+    <button class="np" data-index="7">07. شروط التوقف</button>
+    <button class="np" data-index="8">08. الـUX والتحكم</button>
+    <button class="np" data-index="9">09. الخلاصة</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:var(--s2);">
+    <button class="np" id="scriptToggleBtn" title="عرض نص التقديم (اضغط S)" style="background:var(--tool-muted);color:var(--tool);border-color:rgba(2,132,199,0.3);font-weight:700;">📜 Script [S]</button>
+    <span class="nep">الحلقة 04</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 0: HERO
+     ══════════════════════════════════════════════════ -->
+<section class="slide active" id="s0">
+  <div class="con" style="text-align:center;">
+    <div class="reveal">
+      <div class="hero-badge">
+        <span>🎬 الحلقة 04</span>
+        <span style="color:var(--border-dark)">•</span>
+        <span>المدة: 8–10 دقائق</span>
+        <span style="color:var(--border-dark)">•</span>
+        <span>AI Explained by a UX Designer</span>
+      </div>
+      <h1 class="t-display" style="margin-bottom:var(--s4);color:var(--tp);">
+        The Agentic Loop: <span style="color:var(--tool);">كيفاش يقرر الخطوة الجاية؟</span>
+      </h1>
+      <p class="t-body" style="color:var(--ts);max-width:680px;margin:0 auto var(--s6);">
+        الـAgent ما ينفذش plan ثابتة وخلاص.<br/>
+        <strong>يعمل action، يشوف النتيجة، ويقرر شنوّة يعمل بعد.</strong>
+      </p>
+    </div>
+
+    <!-- Metaphor Graphic -->
+    <div class="gc reveal" style="max-width:760px;margin:0 auto var(--s6);background:var(--bg-1);">
+      <div class="t-label" style="color:var(--tm);margin-bottom:var(--s4);">المعادلة الأساسية للـAgentic Loop</div>
+      
+      <div style="display:flex;align-items:center;justify-content:center;gap:var(--s6);flex-wrap:wrap;">
+        <div style="background:#fff;border:1px solid var(--border-med);padding:var(--s4) var(--s6);border-radius:var(--r-md);text-align:center;">
+          <div style="font-size:2rem;margin-bottom:.3rem;">🧠</div>
+          <div style="font-weight:800;color:var(--brain);">Decide</div>
+          <div class="t-xs" style="color:var(--tm);">شنوّة باش نعمل؟</div>
+        </div>
+
+        <div style="font-size:1.8rem;font-weight:800;color:var(--tool);">➔</div>
+
+        <div style="background:#fff;border:1px solid var(--border-med);padding:var(--s4) var(--s6);border-radius:var(--r-md);text-align:center;">
+          <div style="font-size:2rem;margin-bottom:.3rem;">🔧</div>
+          <div style="font-weight:800;color:var(--tool);">Act</div>
+          <div class="t-xs" style="color:var(--tm);">نستعمل Tool</div>
+        </div>
+
+        <div style="font-size:1.8rem;font-weight:800;color:var(--app);">➔</div>
+
+        <div style="background:var(--app-muted);border:2px solid var(--app);padding:var(--s4) var(--s6);border-radius:var(--r-md);text-align:center;">
+          <div style="font-size:2rem;margin-bottom:.3rem;">👀</div>
+          <div style="font-weight:800;color:var(--app);">Observe</div>
+          <div class="t-xs" style="color:var(--app);">شنوّة صار؟</div>
+        </div>
+      </div>
+
+      <p class="t-sm" style="color:var(--ts);margin-top:var(--s5);">
+        هل الـAgent يجاوب مباشرة بعد ما ياخذ Result؟ موش بالضرورة، الـResult ينجم يبدّل الخطة كلها!
+      </p>
+    </div>
+
+    <div class="reveal" style="font-size:.8rem;color:var(--tm);">
+      <span>💡 اضغط [S] في أي وقت لعرض نص الإلقاء (Script) · اضغط في أي مكان للتقدم</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 1: RECAP EPISODE 3
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s1">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-tool">🔄 تذكير سريع</div>
+      <h2 class="t-h1">من الحلقة 3: Tool Calling</h2>
+      <p class="t-body" style="color:var(--ts);max-width:620px;margin:.4rem auto 0;">
+        شفنا أن الـAI ينجم يستعمل Tool باش يتعامل مع حاجة خارج الـAI.
+      </p>
+    </div>
+
+    <div class="gc reveal" style="max-width:840px;margin:0 auto var(--s6);">
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:var(--s5);">
+        <span class="np" style="background:var(--bg-2);color:var(--tp);font-size:.8rem;">AI: I need order 1024</span>
+        <span style="color:var(--tm);font-weight:700;">➔</span>
+        <span class="np" style="background:var(--tool-muted);color:var(--tool);font-size:.8rem;">get_order</span>
+        <span style="color:var(--tm);font-weight:700;">➔</span>
+        <span class="np" style="background:var(--bg-2);color:var(--tp);font-size:.8rem;">Result: "Shipped"</span>
+      </div>
+
+      <div style="background:var(--warning-m);border:1px solid rgba(217,119,6,0.25);border-radius:var(--r-md);padding:var(--s5);text-align:center;">
+        <h3 class="t-h3" style="color:var(--warning);margin-bottom:.3rem;">أما السؤال هو: شنوّة يعمل الـAgent بالـresult هذا؟</h3>
+        <p class="t-sm" style="color:var(--ts);">
+          لو كان المستخدم يشتكي "طلبيتي ما وصلتش"، وTool قالت "Shipped".. الـAgent مازال ما حلش المشكلة!
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 2: WHAT IS AGENTIC LOOP?
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-brain">🧠 المفهوم الأساسي</div>
+      <h2 class="t-h1">شنوّة هي الـAgentic Loop؟</h2>
+      <p class="t-body" style="color:var(--ts);max-width:620px;margin:.4rem auto 0;">
+        ببساطة: Action ➔ Result ➔ Decision ➔ Next Action
+      </p>
+    </div>
+
+    <div class="gc reveal" style="max-width:880px;margin:0 auto var(--s6); text-align:center;">
+      <div class="t-h2" style="color:var(--tool);font-weight:800; margin-bottom:var(--s4);">
+        « الـAgent يعمل حاجة، يشوف شنوّة صار، يفهم النتيجة، وبعد يقرر الخطوة الجاية »
+      </div>
+      <div style="font-family:var(--font-mono); font-size: 1.2rem; background: var(--bg-1); padding: var(--s4); border-radius: var(--r-md); color: var(--tp);">
+        Act ➔ Observe ➔ Decide ➔ Act Again
+      </div>
+      <p class="t-sm" style="color:var(--ts); margin-top:var(--s4);">
+        وإذا ما وصلش للـGoal... يعاود نفس العملية!
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 3: THE CORE DIAGRAM
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-brain">⭐ المخطط الرئيسي</div>
+      <h2 class="t-h1">The Core Diagram</h2>
+      <p class="t-body" style="color:var(--ts);max-width:640px;margin:.4rem auto 0;">
+        الـLoop كاملة في صورة واحدة
+      </p>
+    </div>
+
+    <div class="gc reveal" style="max-width:860px;margin:0 auto var(--s6);">
+      <div class="flow-container">
+        <div class="flow-box">GOAL: "Solve the issue"</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box highlight">DECIDE: What should I do?</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">ACT: Call a Tool</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">OBSERVE: Get the Result</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box" style="background:var(--bg-1); color:var(--tp); border-color:var(--border-med);">GOAL ACHIEVED?</div>
+        
+        <div style="display:flex; justify-content:center; gap:var(--s12); width:100%; margin-top:var(--s2);">
+          <div style="text-align:center;">
+            <div style="color:var(--danger); font-weight:bold; font-size:1.2rem;">NO</div>
+            <div class="flow-arrow">↓</div>
+            <div class="t-xs" style="color:var(--ts); font-weight:bold;">(Back to DECIDE)</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:var(--app); font-weight:bold; font-size:1.2rem;">YES</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box" style="background:var(--app); color:#fff; width:auto; border:none; padding:var(--s2) var(--s4);">DONE</div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top:var(--s6);background:var(--warning-m);padding:var(--s4);border-radius:var(--r-md);text-align:center;color:var(--warning);font-weight:700;">
+        نقطة مهمة جداً: الـ NO ما ترجعش مباشرة للـ ACTION. ترجع للـ DECIDE، خاطر الـ result الجديد ينجم يغيّر الـ plan!
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 4: REAL EXAMPLE
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-tool">📦 تطبيق عملي</div>
+      <h2 class="t-h1">Real Example — Ahmed's Order</h2>
+      <p class="t-body" style="color:var(--ts);max-width:640px;margin:.4rem auto 0;">
+        الطلبية متاعي ما وصلتش. شوفلي المشكلة وحاول حلها.
+      </p>
+    </div>
+
+    <div class="g2 reveal" style="margin-bottom:var(--s5);">
+      <div class="gc" style="border-left: 4px solid var(--tool);">
+        <div class="tool-tag" style="margin-bottom:.5rem;">ACT: get_order</div>
+        <div style="font-size:0.9rem; color:var(--ts); margin-bottom:0.5rem;"><strong>OBSERVE:</strong> Status: Shipped.</div>
+        <div style="font-size:0.9rem; color:var(--danger); font-weight:bold;">Goal Achieved? NO.</div>
+        <div style="font-size:0.9rem; color:var(--brain); font-weight:bold; margin-top:0.5rem;">➔ DECIDE: وين وصلت الطلبية؟</div>
+      </div>
+
+      <div class="gc" style="border-left: 4px solid var(--tool);">
+        <div class="tool-tag" style="margin-bottom:.5rem;">ACT: track_delivery</div>
+        <div style="font-size:0.9rem; color:var(--ts); margin-bottom:0.5rem;"><strong>OBSERVE:</strong> Status: Delayed.</div>
+        <div style="font-size:0.9rem; color:var(--danger); font-weight:bold;">Goal Achieved? NO.</div>
+        <div style="font-size:0.9rem; color:var(--brain); font-weight:bold; margin-top:0.5rem;">➔ DECIDE: علاش صار delay؟</div>
+      </div>
+
+      <div class="gc" style="border-left: 4px solid var(--tool);">
+        <div class="tool-tag" style="margin-bottom:.5rem;">ACT: get_delivery_issue</div>
+        <div style="font-size:0.9rem; color:var(--ts); margin-bottom:0.5rem;"><strong>OBSERVE:</strong> Address verification required.</div>
+        <div style="font-size:0.9rem; color:var(--danger); font-weight:bold;">Goal Achieved? NO.</div>
+        <div style="font-size:0.9rem; color:var(--brain); font-weight:bold; margin-top:0.5rem;">➔ DECIDE: I need user confirmation.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 5: WORKFLOW VS AGENTIC LOOP
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-brain">⚖️ مقارنة</div>
+      <h2 class="t-h1">Fixed Workflow vs Agentic Loop</h2>
+      <p class="t-body" style="color:var(--ts);max-width:620px;margin:.4rem auto 0;">
+        شنوّة الفرق بين steps محددة مسبقاً وAgent يتكيف مع النتائج؟
+      </p>
+    </div>
+
+    <div class="g2">
+      <!-- Fixed Workflow -->
+      <div class="gc reveal" style="border-top:4px solid var(--tm);">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:var(--s3);">
+          <span style="font-size:1.5rem;">📜</span>
+          <h3 class="t-h3" style="color:var(--tp);">Fixed Workflow</h3>
+        </div>
+        <ul style="list-style:disc;padding-right:1.2rem;line-height:1.8;color:var(--ts);font-size:.85rem;">
+          <li>Get Order</li>
+          <li>Track Delivery</li>
+          <li>Create Ticket</li>
+          <li>Send Email</li>
+          <li>Done</li>
+        </ul>
+        <div class="t-xs" style="color:var(--ts);margin-top:var(--s4);background:var(--bg-2);padding:0.5rem;border-radius:var(--r-sm);">
+          الخطوات محددة من البداية. حتى لو الـresult تبدل، الـworkflow ممكن يبقى يمشي في نفس المسار.
+        </div>
+      </div>
+
+      <!-- Agentic Loop -->
+      <div class="gc highlight reveal" style="border-top:4px solid var(--tool);">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:var(--s3);">
+          <span style="font-size:1.5rem;">🔄</span>
+          <h3 class="t-h3" style="color:var(--tool);">Agentic Loop</h3>
+        </div>
+        <ul style="list-style:disc;padding-right:1.2rem;line-height:1.8;color:var(--ts);font-size:.85rem;">
+          <li>Goal ➔ Decide</li>
+          <li>Act ➔ Observe</li>
+          <li>What did I learn?</li>
+          <li>Decide again ➔ Next Action</li>
+        </ul>
+        <div class="t-xs" style="color:var(--tp);margin-top:var(--s4);background:var(--tool-muted);padding:0.5rem;border-radius:var(--r-sm);">
+          الـAgent يتكيف مع الـresult. (إذا order موجود ➔ Track it. إذا مش موجود ➔ Ask user).
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 6: WHAT IF SOMETHING GOES WRONG?
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s6">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-warn">🚨 التعامل مع الأخطاء</div>
+      <h2 class="t-h1">What If Something Goes Wrong?</h2>
+      <p class="t-body" style="color:var(--ts);max-width:640px;margin:.4rem auto 0;">
+        الـAgentic Loop مهمة جداً وقت اللي الأمور ما تمشيش كما توقعنا.
+      </p>
+    </div>
+
+    <div class="g2 reveal">
+      <div class="gc" style="border-left: 4px solid var(--danger);">
+        <div class="t-label" style="color:var(--danger);margin-bottom:.3rem;">مثال 1: معلومات خاطئة</div>
+        <div class="tool-tag" style="margin-bottom:.5rem;">get_order(1024)</div>
+        <div style="background:var(--bg-1);padding:.6rem;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.75rem;margin-bottom:.5rem;">
+          Result: Order not found
+        </div>
+        <p class="t-xs" style="color:var(--ts);">
+          الـAgent ما يكملش ويعمل track_delivery لأن ما عندوش معلومات. يعمل Observe ➔ Decide ➔ يسأل المستخدم: "تنجم تتأكدلي من رقم الطلبية؟"
+        </p>
+      </div>
+
+      <div class="gc" style="border-left: 4px solid var(--danger);">
+        <div class="t-label" style="color:var(--danger);margin-bottom:.3rem;">مثال 2: مشكلة تقنية</div>
+        <div class="tool-tag" style="margin-bottom:.5rem;">track_delivery</div>
+        <div style="background:var(--bg-1);padding:.6rem;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.75rem;margin-bottom:.5rem;">
+          Result: Service unavailable
+        </div>
+        <p class="t-xs" style="color:var(--ts);">
+          الـAgent ينجم يقرر يعمل retry, wait, أو يجرب tool أخرى، أو يسأل المستخدم للمساعدة.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 7: WHEN DOES THE LOOP STOP?
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-app">🛑 التوقف المبرمج</div>
+      <h2 class="t-h1">وقتاش الـAgent يوقف الـ Loop؟</h2>
+      <p class="t-body" style="color:var(--ts);max-width:640px;margin:.4rem auto 0;">
+        موش كل Agent Loop لازم تستمر إلى ما لا نهاية.
+      </p>
+    </div>
+
+    <div class="g4 reveal" style="margin-bottom:var(--s5);">
+      <div class="gc" style="text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">✅</div>
+        <div class="t-label" style="color:var(--app);">1. Goal achieved</div>
+        <p class="t-xs" style="color:var(--ts); margin-top:0.5rem;">المشكلة تحلت.<br>➔ <strong>Done</strong></p>
+      </div>
+      <div class="gc" style="text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">🙋‍♂️</div>
+        <div class="t-label" style="color:var(--tool);">2. Human input</div>
+        <p class="t-xs" style="color:var(--ts); margin-top:0.5rem;">الـAgent يحتاج information أو confirmation.<br>➔ <strong>Ask User</strong></p>
+      </div>
+      <div class="gc" style="text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">🛡️</div>
+        <div class="t-label" style="color:var(--warning);">3. Permission</div>
+        <p class="t-xs" style="color:var(--ts); margin-top:0.5rem;">الـAgent وصل لـaction حساسة.<br>➔ <strong>Request Approval</strong></p>
+      </div>
+      <div class="gc" style="text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">❌</div>
+        <div class="t-label" style="color:var(--danger);">4. Cannot continue</div>
+        <p class="t-xs" style="color:var(--ts); margin-top:0.5rem;">الـAgent ما عندوش solution.<br>➔ <strong>Escalate</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 8: UX PERSPECTIVE & AUTONOMY
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s8">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-brain">🎨 دور الـ UX</div>
+      <h2 class="t-h1">UX Perspective & Autonomy</h2>
+      <p class="t-body" style="color:var(--ts);max-width:640px;margin:.4rem auto 0;">
+        كيفاش نوري للمستخدم شنوّة يعمل الـAgent ونحافظو على الـ control
+      </p>
+    </div>
+
+    <div class="g2 reveal" style="margin-bottom:var(--s6);">
+      <div class="gc">
+        <h3 class="t-h3" style="color:var(--tp);margin-bottom:var(--s3);">إظهار التقدم (Agent Progress)</h3>
+        <p class="t-sm" style="color:var(--ts);margin-bottom:var(--s3);">
+          الـAgent يعمل برشا خطوات، المستخدم ينجم يحس بالضياع (Uncertainty). لذلك نوريو التقدم:
+        </p>
+        <div class="ux-progress">
+          <div class="done">✓ Checking order</div>
+          <div class="done">✓ Tracking delivery</div>
+          <div class="done">✓ Investigating delay</div>
+          <div class="waiting">⏳ Waiting for confirmation</div>
+        </div>
+      </div>
+
+      <div class="gc highlight">
+        <h3 class="t-h3" style="color:var(--tool);margin-bottom:var(--s3);">Autonomy ≠ Everything Automatically</h3>
+        <p class="t-sm" style="color:var(--ts);margin-bottom:var(--s3);">
+          الـ Agentic Loop ما تعنيش Full Autonomy. بعض الخطوات تحتاج:
+        </p>
+        <div style="background:var(--tool-muted);padding:.8rem;border-radius:var(--r-md);font-size:.85rem;color:var(--tp);">
+          Decide ➔ "Cancel order?" ➔ <strong>Human Approval</strong> ➔ Continue
+        </div>
+        <p class="t-xs" style="color:var(--tm);margin-top:var(--s3);">
+          هذا concept الـ Human-in-the-Loop!
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 9: THE BIG IDEA
+     ══════════════════════════════════════════════════ -->
+<section class="slide" id="s9">
+  <div class="con">
+    <div class="sh reveal">
+      <div class="stag st-tool">🚀 الخلاصة والتشويق</div>
+      <h2 class="t-h1">The Big Idea & Up Next</h2>
+    </div>
+
+    <div class="g2 reveal" style="margin-bottom:var(--s6);">
+      <!-- Key Idea Formula -->
+      <div class="gc" style="display:flex;flex-direction:column;justify-content:center; text-align:center;">
+        <div class="t-label" style="color:var(--tool);margin-bottom:var(--s2);">🧠 أهم فكرة في الحلقة</div>
+        <div class="t-h3" style="color:var(--tp);margin-bottom:var(--s3);line-height:1.6;">
+          « An Agent doesn't just act. It acts, observes the result, and decides what to do next. »
+        </div>
+        <div style="background:var(--bg-1);padding:.6rem;border-radius:var(--r-md);font-family:var(--font-mono);font-size:.9rem;color:var(--tool); font-weight:bold;">
+          Decide ➔ Act ➔ Observe ➔ Decide Again
+        </div>
+      </div>
+
+      <!-- Teaser Episode 5 -->
+      <div class="gc highlight" style="border-right:4px solid var(--brain);">
+        <div class="t-label" style="color:var(--brain);margin-bottom:var(--s2);">🔗 تشويق الحلقة 05</div>
+        <h3 class="t-h2" style="color:var(--tp);margin-bottom:var(--s2);">Episode 5 — Memory vs RAG</h3>
+        <p class="t-sm" style="color:var(--ts);line-height:1.7;margin-bottom:var(--s3);">
+          الـAgent يعمل decisions.. يستعمل Tools.. ويعمل loops.. أما منين يجيب الـinformation اللي يحتاجها؟<br/>
+          شنوّة الفرق بين ما يعرفه الـAgent (What it knows) وما يتذكره (What it remembers)؟
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal" style="text-align:center;">
+      <p class="t-xs" style="color:var(--tm);">
+        سلسلة AI Explained by a UX Designer · الحلقة 04 مكتملة بنجاح ✓
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── BOTTOM SLIDE DECK CONTROLS ── -->
+<div class="deck-controls">
+  <button class="ctrl-btn" id="prevBtn" title="السابق (سهم يسار)">❮</button>
+  <span class="deck-counter" id="slideCounter">1 / 10</span>
+  <button class="ctrl-btn" id="nextBtn" title="التالي (مسافة أو سهم يمين)">❯</button>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>سلسلة <span>AI Explained by a UX Designer</span> · الحلقة 04 · <span>The Agentic Loop</span></p>
+  <p>Engine: <span>Animated Slides + Clear Design System</span></p>
+</footer>
+
+<!-- ── SCRIPT / TELEPROMPTER BACKDROP & DRAWER ── -->
+<div class="script-backdrop" id="scriptBackdrop"></div>
+<aside class="script-panel" id="scriptPanel" aria-label="Presentation Script Panel">
+  <div class="script-header">
+    <div class="script-title">
+      <span>📜</span>
+      <span>Presentation Script</span>
+      <span class="script-shortcut-hint">مفتاح [S]</span>
+    </div>
+    <div class="script-actions">
+      <button class="script-btn" id="scriptZoomOutBtn" title="تصغير الخط">A-</button>
+      <button class="script-btn" id="scriptZoomInBtn" title="تكبير الخط">A+</button>
+      <button class="script-btn close-btn" id="scriptCloseBtn" title="إغلاق (Esc أو S)">✕</button>
+    </div>
+  </div>
+
+  <div class="script-content" id="scriptContent">
+    <div style="font-weight:800;font-size:1.05rem;color:var(--tool);margin-bottom:.3rem;">EPISODE 04 — THE AGENTIC LOOP</div>
+    <div style="font-size:.8rem;color:var(--tm);margin-bottom:1.2rem;">Presentation script · AI Explained by a UX Designer</div>
+
+    <div class="script-section" data-slides="0" id="script-sec-0">
+      <span class="script-sec-badge">[OPENING] · شريحة 00</span>
+      <div class="script-text">في الحلقة اللي فاتت، شفنا حاجة مهمة.
+قلنا إنو الـAI Agent ينجم يستعمل Tools باش يعمل حاجات في العالم الحقيقي.
+مثلاً، عندنا customer اسمو Ahmed. Ahmed يقول للـAgent: "الطلبية متاعي ما وصلتش، شوفلي وين المشكلة."
+الـAgent عندو Tool اسمها: get_order يستعملها باش يجيب معلومات على الطلبية.
+الـTool ترجع مثلاً: Order #1024 — Shipped. ممتاز.
+أما... هل المشكلة تحلّت؟ لا. علاش؟ خاطر "Shipped" معناها الطلبية خرجت من المخزن. أما Ahmed قال: "ما وصلتش."
+إذن الـAgent مازال ما يعرفش: وين الطلبية؟ علاش تأخرت؟ وشنوّة ينجم يعمل باش يحل المشكلة؟
+وهنا يظهر سؤال مهم: إذا الـAgent عمل Action ولقى Result... شنوّة يقرر يعمل بعد؟
+وهذي هي فكرة حلقة اليوم: The Agentic Loop.</div>
+    </div>
+
+    <div class="script-section" data-slides="1" id="script-sec-1">
+      <span class="script-sec-badge" style="color:var(--tool);background:var(--tool-muted);">[RECAP] · شريحة 01</span>
+      <div class="script-text">قبل ما نحكيو على Agentic Loop، خلينا نفهمو كلمة: Loop.
+Loop معناها ببساطة: حاجة تتعاود أكثر من مرة.
+مثلاً، كي تكون تسوق في طريق ومازلت ما وصلتش للdestination:
+تشوف الطريق... تقرر وين تمشي... تمشي... تشوف وين وصلت... وتقرر الاتجاه التالي... وتعاود.
+ما عندكش بالضرورة كل تفاصيل الطريق من البداية.
+كل مرة تشوف وين وصلت، تستعمل المعلومة الجديدة باش تحدد الخطوة التالية. الـAgent يعمل حاجة شبيهة جداً.</div>
+    </div>
+
+    <div class="script-section" data-slides="2" id="script-sec-2">
+      <span class="script-sec-badge" style="color:var(--brain);background:var(--brain-muted);">[WHAT IS AGENTIC LOOP?] · شريحة 02</span>
+      <div class="script-text">الـAgent عندو: Goal. يعني هدف لازم يوصلو. مثلاً: "حل مشكلة الطلبية متاع Ahmed."
+الـAgent ما يعرفش بالضرورة من البداية كل الخطوات اللي باش يعملهم.
+هو يبدأ يسأل: "شنوّة أول حاجة نحتاج نعرفها؟" يقرر. يعمل Action. ياخذ Result.
+وبعد يسأل مرة أخرى: "بعد اللي عرفتو توا... شنوّة لازم نعمل؟" وهنا بالضبط تبدأ الـLoop.
+
+نجموا نختصروها في 3 مراحل رئيسية:
+1. Decide: الـAgent يقرر: "شنوّة نعمل توا؟"
+2. Act: يعمل الحاجة اللي قرر عليها. مثلاً يستعمل Tool.
+3. Observe: يشوف شنوّة كانت النتيجة.
+وبعد الـresult الجديد يرجع للـAgent، والـAgent يسأل: "Okay... what should I do next?"
+وهنا يرجع: Decide. يعني: Decide → Act → Observe → Decide Again
+وهذا هو الـAgentic Loop.</div>
+    </div>
+
+    <div class="script-section" data-slides="3" id="script-sec-3">
+      <span class="script-sec-badge" style="color:var(--brain);background:var(--brain-muted);">[CORE DIAGRAM] · شريحة 03</span>
+      <div class="script-text">نبدأو من فوق:
+GOAL: عندنا هدف. مثلاً: "Solve Ahmed's delivery problem." الـAgent يعرف شنوّة لازم يحقق أما مازال ما يعرفش بالضبط كيفاش باش يوصل للهدف.
+↓ DECIDE: توا يسأل: "شنوّة أول معلومة نحتاجها؟" يقرر: "نحتاج نعرف معلومات على الطلبية."
+↓ ACT: يستعمل Tool: get_order. الـAgent طلب من النظام يعمل Action.
+↓ OBSERVE: الـTool ترجع نتيجة: Order #1024 — Shipped. الـAgent يشوف النتيجة.
+↓ GOAL ACHIEVED?: توا الـAgent يسأل: "هل الهدف تحقق؟" هدفنا كان: حل مشكلة التوصيل. هل عرفنا المشكلة؟ لا. إذن ما نوقفوش.
+وهنا النقطة المهمة جداً: ما نعملوش Action عشوائي. نرجعو إلى: DECIDE.
+
+علاش بعد الـObserve نرجعو للـDecide؟ خاطر الـAgent تعلم حاجة جديدة.
+قبل ما يستعمل get_order، كان ما يعرفش status متاع الطلبية. توا عرف: Shipped.
+المعلومة الجديدة هذي تغير شنوّة لازم يعمل بعد. يقول: "Okay, الطلبية shipped. إذن لازم نعرف وين وصلت." فيقرر: track_delivery. وهذا Decision جديد.
+يعني: Result → changes the next decision. وهذي هي القوة الحقيقية متاع الـAgentic Loop.</div>
+    </div>
+
+    <div class="script-section" data-slides="4" id="script-sec-4">
+      <span class="script-sec-badge" style="color:var(--tool);background:var(--tool-muted);">[REAL EXAMPLE] · شريحة 04</span>
+      <div class="script-text">خلينا نعيشو العملية كاملة. Ahmed يقول: "الطلبية متاعي ما وصلتش. شوفلي المشكلة." الـGoal: Solve the delivery issue.
+STEP 1 — DECIDE: "أول حاجة نحتاج نعرف معلومات الطلبية."
+STEP 2 — ACT: يستعمل get_order
+STEP 3 — OBSERVE: النتيجة: Shipped. المشكلة ما تحلتش.
+STEP 4 — DECIDE AGAIN: "إذا هي shipped، نحتاج نعرف وين وصلت."
+STEP 5 — ACT: يستعمل track_delivery
+STEP 6 — OBSERVE: النتيجة: Delayed in Tunis. توا عندو معلومة جديدة، لكن مازال سؤال: علاش تأخرت؟
+STEP 7 — DECIDE AGAIN: "لازم نعرف سبب الـdelay."
+STEP 8 — ACT: يستعمل Tool أخرى: get_delivery_issue
+STEP 9 — OBSERVE: النتيجة: Address verification required. توا الـAgent فهم المشكلة. لكن ما ينجمش يغير عنوان Ahmed وحدو.
+STEP 10 — STOP THE LOOP: الـAgent يقول: "I need the customer's confirmation." وهنا الـLoop توقف مؤقتاً. والـAgent يسأل Ahmed: "شركة التوصيل تحتاج تأكيد عنوان التوصيل. تحب نكمل؟"
+
+الـAgent ما كانش يعرف كل الخطوات من البداية. כל خطوة كانت تعتمد على شنوّة اكتشف في الخطوة اللي قبلها.</div>
+    </div>
+
+    <div class="script-section" data-slides="5" id="script-sec-5">
+      <span class="script-sec-badge" style="color:var(--brain);background:var(--brain-muted);">[WORKFLOW VS LOOP] · شريحة 05</span>
+      <div class="script-text">وهذا هو الفرق بين Fixed Workflow و Agentic Loop.
+في الـ Fixed Workflow: الـDeveloper يقول للنظام: اعمل هاذم الخطوات بالترتيب (Get Order → Track Delivery → Create Ticket → Send Email → Done). الخطوات معروفة مسبقاً، والـworkflow ممكن يبقى يتبع نفس المسار إلا إذا الـdeveloper حط conditions.
+أما في الـ Agentic Loop: الـAgent عندو Goal وعندو Tools. وكل مرة يحصل على result جديد، يعاود يفكر: "What should I do next?"
+إذا get_order يقول Order exists → Track it. إذا يقول Order not found → Ask Ahmed.
+إذا track_delivery يقول Delivered → يمكن يسأل Ahmed إذا استلمها. إذا يقول Delayed → Investigate.
+إذن نفس الـGoal... لكن الـpath ينجم يتبدل. وهنا نقولو: The Agent adapts.</div>
+    </div>
+
+    <div class="script-section" data-slides="6" id="script-sec-6">
+      <span class="script-sec-badge" style="color:var(--warning);background:var(--warning-m);">[FAILURES] · شريحة 06</span>
+      <div class="script-text">في العالم الحقيقي، الـTools موش ديما تخدم.
+مثلاً الـAgent يعمل get_order(1024) والـsystem يرجع: Order not found.
+شنوّة يعمل؟ ما ينجمش يمشي يعمل track_delivery. إذن: Observe ↓ Decide ويقول: "I need more information." ويسأل Ahmed: "Can you confirm your order number?"
+مثال آخر. الـAgent يعمل track_delivery لكن الـdelivery API ما تخدمش. النتيجة: Service unavailable.
+هنا الـAgent يقدر يقرر: نجرب مرة أخرى؟ أو نستعمل Tool أخرى؟ أو نستنى؟ أو نطلب مساعدة من Human؟
+لاحظو: الـerror نفسه ولى Input للـnext decision.
+The result changes what the Agent does next.</div>
+    </div>
+
+    <div class="script-section" data-slides="7" id="script-sec-7">
+      <span class="script-sec-badge" style="color:var(--app);background:var(--app-muted);">[WHEN TO STOP] · شريحة 07</span>
+      <div class="script-text">وقتاش يوقف الـLoop؟
+الحالة الأولى: Goal achieved. المشكلة تحلت. → Done.
+الحالة الثانية: Needs user input. يحتاج معلومة من المستخدم. → Ask User.
+الحالة الثالثة: Needs approval. Action معينة تحتاج موافقة. → Request Approval.
+الحالة الرابعة: Cannot continue. ما لقا حتى حل. → Escalate to Human.
+إذن الـAgent لازم يعرف كيفاش يكمل... لكن زادة وقتاش يوقف.</div>
+    </div>
+
+    <div class="script-section" data-slides="8" id="script-sec-8">
+      <span class="script-sec-badge" style="color:var(--brain);background:var(--brain-muted);">[UX PERSPECTIVE] · شريحة 08</span>
+      <div class="script-text">كمصمم UX، لازم نوري للمستخدم شنوّة قاعد يصير (Progress) باش نتجنب الـ uncertainty.
+بدل "AI is thinking..."، نوريو: ✓ Checking order ✓ Tracking delivery ⏳ Waiting for your confirmation. هكا المستخدم يفهم شنوّة لقى الـAgent وين وصل وشنوّة يحتاج منه.
+و حاجة أخرى: Agentic ما يعنيش "خليه يعمل كل شيء وحدو". 
+بعض الـ actions كيف Cancel order أو Refund تحتاج confirmation أو approval من الإنسان.
+إذن الـAgent ينجم يكون autonomous في بعض actions... وفي actions أخرى: يوقف ويطلب الإنسان. وهذا يسمى: Human-in-the-Loop.</div>
+    </div>
+
+    <div class="script-section" data-slides="9" id="script-sec-9">
+      <span class="script-sec-badge" style="color:var(--tool);background:var(--tool-muted);">[THE BIG IDEA] · شريحة 09</span>
+      <div class="script-text">الخلاصة:
+الـAgent موش مجرد AI يعمل Actions، وموش مجرد Workflow فيه خطوات ثابتة.
+الـAgent عندو: Goal. وبعد: Decide يختار Action، Act يعملها، Observe يشوف النتيجة. وبعد يستعمل النتيجة هذي باش يعمل: Decide Again.
+يعني: DECIDE → ACT → OBSERVE → DECIDE. وهذي العملية تنجم تتعاود أكثر من مرة حتى Goal Achieved → DONE، أو Human Needed → PAUSE، أو Cannot Continue → ESCALATE.
+
+إذن فهمنا شنوّة Agent وكيفاش يخدم، وكيفاش يستعمل Tools (الحلقة 3)، وكيفاش يقرر الخطوة الجاية (The Agentic Loop).
+لكن توا يطلع سؤال جديد: إذا الـAgent ياخذ decisions بناءً على information... منين جاب الـinformation أصلاً؟
+في الحلقة الجاية (Episode 5): Memory vs RAG. What does an Agent know... and what does it remember?</div>
+    </div>
+
+  </div>
+</aside>
+
+<script>
+/* ── SLIDE DECK ENGINE ── */
+const slides = document.querySelectorAll('.slide');
+const navLinks = document.querySelectorAll('.np:not(#scriptToggleBtn)');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const slideCounter = document.getElementById('slideCounter');
+let currentSlideIndex = 0;
+
+function showSlide(index) {
+  if (index < 0) index = 0;
+  if (index >= slides.length) index = slides.length - 1;
+  currentSlideIndex = index;
+  
+  // Hide all slides
+  slides.forEach(slide => {
+    slide.classList.remove('active');
+    const reveals = slide.querySelectorAll('.reveal');
+    reveals.forEach(r => r.classList.remove('visible'));
+  });
+  
+  // Show active slide
+  const activeSlide = slides[currentSlideIndex];
+  activeSlide.classList.add('active');
+  activeSlide.scrollTop = 0; // reset scroll
+  
+  // Trigger staggered animations
+  setTimeout(() => {
+    const reveals = activeSlide.querySelectorAll('.reveal');
+    reveals.forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 130);
+    });
+  }, 80);
+
+  // Update Nav Pills
+  navLinks.forEach((link, idx) => {
+    link.classList.toggle('current', idx === currentSlideIndex);
+  });
+
+  // Update Counter
+  if (slideCounter) {
+    slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+  }
+
+  // Update Script Panel Active Section
+  updateScriptHighlight(currentSlideIndex);
+}
+
+/* ── SCRIPT PANEL FUNCTIONALITY ── */
+const scriptPanel = document.getElementById('scriptPanel');
+const scriptBackdrop = document.getElementById('scriptBackdrop');
+const scriptToggleBtn = document.getElementById('scriptToggleBtn');
+const scriptCloseBtn = document.getElementById('scriptCloseBtn');
+const scriptContent = document.getElementById('scriptContent');
+const scriptZoomInBtn = document.getElementById('scriptZoomInBtn');
+const scriptZoomOutBtn = document.getElementById('scriptZoomOutBtn');
+const scriptSections = document.querySelectorAll('.script-section');
+let scriptFontSize = 0.95;
+
+function openScriptPanel() {
+  scriptPanel.classList.add('open');
+  scriptBackdrop.classList.add('open');
+  updateScriptHighlight(currentSlideIndex);
+}
+
+function closeScriptPanel() {
+  scriptPanel.classList.remove('open');
+  scriptBackdrop.classList.remove('open');
+}
+
+function toggleScriptPanel() {
+  if (scriptPanel.classList.contains('open')) {
+    closeScriptPanel();
+  } else {
+    openScriptPanel();
+  }
+}
+
+function updateScriptHighlight(slideIdx) {
+  let matchedSection = null;
+  scriptSections.forEach(sec => {
+    const slideRange = sec.getAttribute('data-slides').split(',').map(s => parseInt(s.trim()));
+    if (slideRange.includes(slideIdx)) {
+      sec.classList.add('active-section');
+      matchedSection = sec;
+    } else {
+      sec.classList.remove('active-section');
+    }
+  });
+
+  if (matchedSection && scriptPanel.classList.contains('open')) {
+    matchedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// Click script section to jump to slide
+scriptSections.forEach(sec => {
+  sec.addEventListener('click', () => {
+    const slideRange = sec.getAttribute('data-slides').split(',').map(s => parseInt(s.trim()));
+    showSlide(slideRange[0]);
+  });
+});
+
+scriptToggleBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleScriptPanel();
+});
+scriptCloseBtn?.addEventListener('click', closeScriptPanel);
+scriptBackdrop?.addEventListener('click', closeScriptPanel);
+
+// Script font size controls
+scriptZoomInBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (scriptFontSize < 1.4) {
+    scriptFontSize += 0.1;
+    scriptContent.style.fontSize = scriptFontSize + 'rem';
+  }
+});
+
+scriptZoomOutBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (scriptFontSize > 0.75) {
+    scriptFontSize -= 0.1;
+    scriptContent.style.fontSize = scriptFontSize + 'rem';
+  }
+});
+
+/* ── INTERACTION CONTROLS ── */
+
+// Advance on clicking slide background
+document.body.addEventListener('click', (e) => {
+  if(e.target.closest('button') || e.target.closest('nav') || e.target.closest('.np') || e.target.closest('.mock-window') || e.target.closest('.deck-controls') || e.target.closest('.script-panel')) {
+    return;
+  }
+  if (currentSlideIndex < slides.length - 1) {
+    showSlide(currentSlideIndex + 1);
+  }
+});
+
+// Arrow Keys, Spacebar, S, Esc
+document.addEventListener('keydown', (e) => {
+  // Press 's' or 'S' to toggle script
+  if (e.key === 's' || e.key === 'S') {
+    e.preventDefault();
+    toggleScriptPanel();
+    return;
+  }
+  
+  // Esc closes script panel
+  if (e.key === 'Escape') {
+    if (scriptPanel.classList.contains('open')) {
+      closeScriptPanel();
+      return;
+    }
+  }
+
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+    if (currentSlideIndex < slides.length - 1) {
+      e.preventDefault();
+      showSlide(currentSlideIndex + 1);
+    }
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (currentSlideIndex > 0) {
+      e.preventDefault();
+      showSlide(currentSlideIndex - 1);
+    }
+  }
+});
+
+// Prev / Next button listeners
+prevBtn?.addEventListener('click', () => showSlide(currentSlideIndex - 1));
+nextBtn?.addEventListener('click', () => showSlide(currentSlideIndex + 1));
+
+// Navigation Pill clicks
+navLinks.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetIndex = parseInt(btn.getAttribute('data-index'));
+    showSlide(targetIndex);
+  });
+});
+
+// Initialize on first slide
+showSlide(0);
+
+</script>
+</body>
+</html>

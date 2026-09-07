@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Orchestrator Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.88);
+            --tp: #0f172a;
+            --ts: #475569;
+            --tool: #0284c7;
+            --tool-light: #38bdf8;
+            --brain: #7c3aed;
+            --app: #059669;
+            --border-med: rgba(0,0,0,0.12);
+            --r-lg: 16px;
+            --r-md: 10px;
+            --sh-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.04);
+            --sh-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+            --sh-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--tp);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 920px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.6rem;
+            color: var(--tool);
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--ts);
+            font-size: 1.1rem;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-med);
+            border-radius: var(--r-lg);
+            padding: 30px;
+            box-shadow: var(--sh-md);
+            margin-bottom: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--tp);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-med);
+            border-radius: var(--r-md);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            background: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--tool);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            background: var(--tool);
+            color: #fff;
+            border: none;
+            padding: 13px 26px;
+            border-radius: var(--r-md);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--tool-light);
+            transform: translateY(-2px);
+            box-shadow: var(--sh-md);
+        }
+
+        .btn-brain {
+            background: var(--brain);
+        }
+        .btn-brain:hover {
+            background: #9333ea;
+        }
+
+        .btn-app {
+            background: var(--app);
+        }
+        .btn-app:hover {
+            background: #10b981;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--ts);
+            border: 1px solid var(--border-med);
+        }
+        .btn-outline:hover {
+            background: #e2e8f0;
+            color: var(--tp);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 99px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3000;
+            box-shadow: var(--sh-lg);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal {
+            background: #fff;
+            border-radius: var(--r-lg);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--sh-xl);
+            transform: translateY(20px) scale(0.98);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.show .modal {
+            transform: translateY(0) scale(1);
+        }
+        .modal h2 {
+            margin-top: 0;
+            color: var(--brain);
+            font-weight: 800;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        /* ============================================================
+           SIMULATION MODAL STYLES (Cyber / Futuristic Agent Command)
+           ============================================================ */
+        .sim-modal {
+            background: #0b1120;
+            color: #f8fafc;
+            border-radius: 20px;
+            padding: 28px;
+            width: 100%;
+            max-width: 860px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            direction: ltr; /* Keeps log syntax & pipeline aligned cleanly */
+            text-align: left;
+            position: relative;
+        }
+
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 18px;
+            margin-bottom: 20px;
+        }
+
+        .sim-title-group h2 {
+            margin: 0 0 6px 0;
+            font-size: 1.45rem;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+        }
+
+        .sim-pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 12px #10b981;
+            animation: pulse-glow 1.5s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(0.9); opacity: 0.7; box-shadow: 0 0 4px #10b981; }
+            50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 16px #10b981; }
+            100% { transform: scale(0.9); opacity: 0.7; box-shadow: 0 0 4px #10b981; }
+        }
+
+        .sim-badge {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            display: inline-block;
+        }
+
+        .sim-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sim-speed-btn {
+            background: rgba(255, 255, 255, 0.07);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sim-speed-btn:hover, .sim-speed-btn.active {
+            background: #0284c7;
+            color: #fff;
+            border-color: #38bdf8;
+        }
+
+        .sim-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .sim-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* Progress Bar */
+        .sim-progress-wrapper {
+            margin-bottom: 22px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+        }
+
+        .sim-progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            margin-bottom: 10px;
+        }
+
+        .sim-progress-meta strong {
+            color: #f1f5f9;
+        }
+
+        .sim-progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sim-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0284c7, #8b5cf6, #10b981);
+            border-radius: 99px;
+            transition: width 0.4s ease-out;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+        }
+
+        /* Stages Stepper Grid */
+        .sim-stages-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sim-stages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .sim-stage-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            padding: 12px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sim-stage-card.pending {
+            opacity: 0.45;
+        }
+
+        .sim-stage-card.active {
+            opacity: 1;
+            background: rgba(56, 189, 248, 0.08);
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .sim-stage-card.completed {
+            opacity: 0.9;
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .sim-stage-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .sim-stage-icon {
+            font-size: 1.25rem;
+        }
+
+        .sim-stage-status {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .sim-stage-card.pending .sim-stage-status {
+            background: rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
+        }
+
+        .sim-stage-card.active .sim-stage-status {
+            background: #0284c7;
+            color: #fff;
+            animation: pulse-badge 1s infinite alternate;
+        }
+
+        .sim-stage-card.completed .sim-stage-status {
+            background: #059669;
+            color: #fff;
+        }
+
+        @keyframes pulse-badge {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .sim-stage-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 2px;
+        }
+
+        .sim-stage-role {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            line-height: 1.25;
+        }
+
+        /* Terminal Console */
+        .sim-terminal {
+            background: #030712;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            font-family: 'Fira Code', monospace;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .sim-terminal-bar {
+            background: #111827;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sim-terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .sim-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .sim-dot-red { background: #ef4444; }
+        .sim-dot-yellow { background: #f59e0b; }
+        .sim-dot-green { background: #10b981; }
+
+        .sim-terminal-title {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+
+        .sim-terminal-body {
+            padding: 14px;
+            height: 160px;
+            overflow-y: auto;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .sim-log-line {
+            margin-bottom: 4px;
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            animation: fadeInLog 0.25s ease-in;
+        }
+
+        @keyframes fadeInLog {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sim-log-time {
+            color: #64748b;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .sim-log-tag {
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+        }
+
+        .sim-tag-collector { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+        .sim-tag-structurer { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .sim-tag-slides { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .sim-tag-html { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .sim-tag-ui { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .sim-tag-visual { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+        .sim-tag-qa { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+        .sim-tag-done { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+        .sim-log-text {
+            color: #e2e8f0;
+            word-break: break-word;
+        }
+
+        /* Simulation Complete Banner */
+        .sim-complete-banner {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.25));
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            border-radius: 12px;
+            animation: fadeInLog 0.4s ease-in;
+        }
+
+        .sim-complete-banner.show {
+            display: block;
+        }
+
+        .sim-complete-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .sim-complete-msg h4 {
+            margin: 0 0 4px 0;
+            color: #34d399;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sim-complete-msg p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .sim-complete-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sim-action-btn {
+            background: #10b981;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .sim-action-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .sim-action-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sim-action-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Agent Orchestrator</h1>
+            <p>Course Automation & Workflow Dashboard</p>
+        </div>
+
+        <div class="glass-card">
+            <h2 style="margin-top:0; color:var(--tool);"><span style="font-size:1.5rem;">📝</span> Create New Presentation</h2>
+            <p style="color:var(--ts); font-size:0.9rem; margin-bottom: 25px;">Fill out this form to queue a new presentation generation task and watch the Agent ecosystem in action.</p>
+            
+            <form id="presentationForm">
+                <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label for="episodeNumber">Episode Number</label>
+                        <input type="text" id="episodeNumber" placeholder="e.g. 05" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Presentation Title</label>
+                        <input type="text" id="title" placeholder="e.g. Memory vs RAG" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Language</label>
+                        <select id="language">
+                            <option value="Ar+En">عربي + English Terms</option>
+                            <option value="Ar">Arabic (عربي)</option>
+                            <option value="En">English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="content">Raw Content / Context</label>
+                    <textarea id="content" placeholder="Paste the content, markdown, or text to be structured here..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="script">Presentation Script (Optional)</label>
+                    <textarea id="script" placeholder="Paste the script for the teleprompter panel here..."></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%;">
+                    <span>Queue Generation Task & Simulate Agent Workflow</span> 🚀
+                </button>
+            </form>
+        </div>
+
+        <div class="actions-grid">
+            <div class="glass-card" style="margin-bottom:0; text-align:center;">
+                <h3 style="margin-top:0; color:var(--brain);">Cover Page (Index)</h3>
+                <p style="color:var(--ts); font-size:0.85rem; margin-bottom: 20px;">Generates a beautifully designed index.html file that links all existing presentations together.</p>
+                <button id="btnOpenIndexModal" class="btn btn-brain" style="width: 100%;">Generate Index 📑</button>
+            </div>
+
+            <div class="glass-card" style="margin-bottom:0; text-align:center;">
+                <h3 style="margin-top:0; color:var(--app);">Course Summary</h3>
+                <p style="color:var(--ts); font-size:0.85rem; margin-bottom: 20px;">Queues a task for the Agent to summarize all episodes in your data.</p>
+                <button id="btnSummary" class="btn btn-app" style="width: 100%;">Request Summary 📊</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Index Generation Modal -->
+    <div class="modal-overlay" id="indexModal">
+        <div class="modal">
+            <h2>Generate Course Index</h2>
+            <p style="color:var(--ts); font-size:0.9rem; margin-bottom: 25px;">Add instructor details to personalize the cover page.</p>
+            
+            <form id="indexForm">
+                <div class="form-group">
+                    <label for="instructorName">Instructor Name</label>
+                    <input type="text" id="instructorName" placeholder="e.g. Naiim C.">
+                </div>
+                <div class="form-group">
+                    <label for="instructorRole">Role</label>
+                    <input type="text" id="instructorRole" placeholder="e.g. UX Designer & AI Educator">
+                </div>
+                <div class="form-group">
+                    <label for="instructorSummary">Bio / Summary (Optional)</label>
+                    <textarea id="instructorSummary" style="min-height: 80px;" placeholder="A short bio about the instructor..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="btnCancelIndex">Cancel</button>
+                    <button type="submit" class="btn btn-brain" id="btnConfirmIndex">Generate ➔</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Agent Simulation Modal -->
+    <div class="modal-overlay" id="simModalOverlay">
+        <div class="sim-modal" id="simModal">
+            <div class="sim-header">
+                <div class="sim-title-group">
+                    <h2>
+                        <span class="sim-pulse-dot"></span>
+                        Agent Orchestration Simulation
+                    </h2>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                        <span class="sim-badge" id="simTargetEp">Episode 05</span>
+                        <span style="color: #94a3b8; font-size: 0.85rem;" id="simTargetTitle">Memory vs RAG</span>
+                    </div>
+                </div>
+
+                <div class="sim-controls">
+                    <button class="sim-speed-btn active" id="btnSpeed1x" title="Normal Speed">1x</button>
+                    <button class="sim-speed-btn" id="btnSpeed2x" title="Fast Speed">2x</button>
+                    <button class="sim-speed-btn" id="btnSpeedFast" title="Skip to Finish">⏩ Skip</button>
+                    <button class="sim-close-btn" id="btnSimClose" title="Close">✕</button>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="sim-progress-wrapper">
+                <div class="sim-progress-meta">
+                    <div>
+                        <span style="color: #94a3b8;">Active Agent:</span>
+                        <strong id="simCurrentAgentLabel">Collector Agent</strong>
+                    </div>
+                    <div style="display: flex; gap: 14px;">
+                        <span style="color: #64748b;" id="simTimer">⏱️ 00:00</span>
+                        <strong style="color: #38bdf8;" id="simProgressPercent">0%</strong>
+                    </div>
+                </div>
+                <div class="sim-progress-track">
+                    <div class="sim-progress-fill" id="simProgressFill"></div>
+                </div>
+            </div>
+
+            <!-- Stages Grid (8 Key Agent Roles from rules) -->
+            <div class="sim-stages-grid" id="simStagesGrid">
+                <div class="sim-stage-card pending" id="stage-collector">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">📥</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">Collector</div>
+                    <div class="sim-stage-role">Extracts raw text & scripts</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-structurer">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">🧠</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">Structurer</div>
+                    <div class="sim-stage-role">Semantic JSON outline</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-slides">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">📑</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">Slide Planner</div>
+                    <div class="sim-stage-role">Decks, bullet points & flow</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-html">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">🏛️</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">HTML Architect</div>
+                    <div class="sim-stage-role">Semantic tags & archetypes</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-ui">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">🎨</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">UI Designer</div>
+                    <div class="sim-stage-role">HSL tokens & Outfit font</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-visual">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">✨</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">Visual Designer</div>
+                    <div class="sim-stage-role">Hierarchy & micro-interactions</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-qa">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">🔍</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">Visual QA</div>
+                    <div class="sim-stage-role">Contrast & RTL audits</div>
+                </div>
+
+                <div class="sim-stage-card pending" id="stage-orchestrator">
+                    <div class="sim-stage-header">
+                        <span class="sim-stage-icon">🚀</span>
+                        <span class="sim-stage-status">Pending</span>
+                    </div>
+                    <div class="sim-stage-name">Final Output</div>
+                    <div class="sim-stage-role">Queued into trigger.json</div>
+                </div>
+            </div>
+
+            <!-- Terminal Console Logs -->
+            <div class="sim-terminal">
+                <div class="sim-terminal-bar">
+                    <div class="sim-terminal-dots">
+                        <div class="sim-dot sim-dot-red"></div>
+                        <div class="sim-dot sim-dot-yellow"></div>
+                        <div class="sim-dot sim-dot-green"></div>
+                    </div>
+                    <div class="sim-terminal-title">AGENT THOUGHT STREAM & EXECUTION LOGS</div>
+                    <div style="font-size: 0.72rem; color: #64748b;">Live Stream</div>
+                </div>
+                <div class="sim-terminal-body" id="simTerminalBody">
+                    <!-- Dynamic logs stream here -->
+                </div>
+            </div>
+
+            <!-- Completed Banner -->
+            <div class="sim-complete-banner" id="simCompleteBanner">
+                <div class="sim-complete-flex">
+                    <div class="sim-complete-msg">
+                        <h4>🎉 Generation Simulation Complete!</h4>
+                        <p id="simCompleteDesc">The task has been safely compiled and registered into trigger.json.</p>
+                    </div>
+                    <div class="sim-complete-actions">
+                        <button class="sim-action-btn" id="btnCopyPrompt">
+                            <span>📋 Copy Chat Sync Prompt</span>
+                        </button>
+                        <button class="sim-action-btn sim-action-btn-secondary" id="btnDoneClose">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Action completed!</div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        function showToast(message, requireSync = false) {
+            const toast = document.getElementById('toast');
+            
+            if(requireSync) {
+                toast.innerHTML = `${message} <strong style="color:var(--tool-light); margin-right:8px;">[Important: Say 'Sync' in AI chat to start]</strong>`;
+            } else {
+                toast.textContent = message;
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 6000);
+        }
+
+        // ==========================================
+        // AGENT SIMULATION ENGINE (Real Polling)
+        // ==========================================
+        const simModalOverlay = document.getElementById('simModalOverlay');
+        const simTerminalBody = document.getElementById('simTerminalBody');
+        const simProgressFill = document.getElementById('simProgressFill');
+        const simProgressPercent = document.getElementById('simProgressPercent');
+        const simCurrentAgentLabel = document.getElementById('simCurrentAgentLabel');
+        const simTimer = document.getElementById('simTimer');
+        const simCompleteBanner = document.getElementById('simCompleteBanner');
+        const simCompleteDesc = document.getElementById('simCompleteDesc');
+        const btnCopyPrompt = document.getElementById('btnCopyPrompt');
+
+        let simSpeedMultiplier = 1;
+        let simTimeouts = [];
+        let simTimerInterval = null;
+        let simPollInterval = null;
+        let simSecondsElapsed = 0;
+        let currentGeneratedFilename = '';
+        let currentEpisodeNum = '';
+        let currentTitle = '';
+        let currentJobId = null;
+        let currentPresentationUrl = null;
+        let currentIndexUrl = null;
+
+        function setSimSpeed(speed, activeBtnId) {
+            simSpeedMultiplier = speed;
+            document.querySelectorAll('.sim-speed-btn').forEach(btn => btn.classList.remove('active'));
+            if(activeBtnId) {
+                document.getElementById(activeBtnId)?.classList.add('active');
+            }
+        }
+
+        document.getElementById('btnSpeed1x').addEventListener('click', () => setSimSpeed(1, 'btnSpeed1x'));
+        document.getElementById('btnSpeed2x').addEventListener('click', () => setSimSpeed(2, 'btnSpeed2x'));
+        document.getElementById('btnSpeedFast').addEventListener('click', () => {
+            // Just speed up UI animation; real generation still runs in background
+            simSpeedMultiplier = 4;
+            appendSimLog('sim-tag-done', 'SIM', 'Fast-forward mode — UI simulation accelerated. File generation continues in background.');
+        });
+
+        document.getElementById('btnSimClose').addEventListener('click', closeSimulation);
+        document.getElementById('btnDoneClose').addEventListener('click', closeSimulation);
+
+        function closeSimulation() {
+            simModalOverlay.classList.remove('show');
+            clearSimTimeouts();
+            if(simTimerInterval) clearInterval(simTimerInterval);
+            if(simPollInterval) clearInterval(simPollInterval);
+        }
+
+        function clearSimTimeouts() {
+            simTimeouts.forEach(t => clearTimeout(t));
+            simTimeouts = [];
+        }
+
+        function appendSimLog(tagClass, tagLabel, message) {
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            const line = document.createElement('div');
+            line.className = 'sim-log-line';
+            line.innerHTML = `
+                <span class="sim-log-time">[${timeStr}]</span>
+                <span class="sim-log-tag ${tagClass}">[${tagLabel}]</span>
+                <span class="sim-log-text">${message}</span>
+            `;
+            simTerminalBody.appendChild(line);
+            simTerminalBody.scrollTop = simTerminalBody.scrollHeight;
+        }
+
+        function updateStageCard(stageId, statusText, statusType) {
+            const card = document.getElementById(`stage-${stageId}`);
+            if(!card) return;
+
+            card.classList.remove('pending', 'active', 'completed');
+            card.classList.add(statusType);
+
+            const badge = card.querySelector('.sim-stage-status');
+            if(badge) {
+                badge.textContent = statusText;
+            }
+        }
+
+        let simStepsQueue = [];
+
+        function buildSimulationPlan(payload) {
+            const ep = payload.episodeNumber || '01';
+            const title = payload.title || 'Topic';
+            const lang = payload.language || 'Ar+En';
+            const contentLen = (payload.content || '').length;
+
+            return [
+                {
+                    agent: 'collector',
+                    label: 'Collector Agent (collector.md)',
+                    percent: 12,
+                    duration: 1200,
+                    logs: [
+                        { tag: 'sim-tag-collector', label: 'COLLECTOR', msg: `Received raw payload for Episode ${ep}: "${title}".` },
+                        { tag: 'sim-tag-collector', label: 'COLLECTOR', msg: `Sanitizing input (${contentLen} characters). Extracting presentation core & speaker notes.` }
+                    ]
+                },
+                {
+                    agent: 'structurer',
+                    label: 'Structurer Agent (structurer.md)',
+                    percent: 26,
+                    duration: 1400,
+                    logs: [
+                        { tag: 'sim-tag-structurer', label: 'STRUCTURER', msg: `Parsing concepts for "${title}". Segmenting problem space, core loops & real-world examples.` },
+                        { tag: 'sim-tag-structurer', label: 'STRUCTURER', msg: `Synthesizing structured JSON hierarchy with narrative trajectory.` }
+                    ]
+                },
+                {
+                    agent: 'slides',
+                    label: 'Slide Planner Agent (slides.md)',
+                    percent: 42,
+                    duration: 1400,
+                    logs: [
+                        { tag: 'sim-tag-slides', label: 'SLIDES', msg: `Generating slide schema: Hero -> Concept Hook -> Deep Dive -> Comparative Matrix -> Summary.` },
+                        { tag: 'sim-tag-slides', label: 'SLIDES', msg: `Language target: [${lang}]. Formulating concise bullet points and pedagogical takeaways.` }
+                    ]
+                },
+                {
+                    agent: 'html',
+                    label: 'HTML Architect (html-agent.md)',
+                    percent: 58,
+                    duration: 1500,
+                    logs: [
+                        { tag: 'sim-tag-html', label: 'HTML-ARCH', msg: `Constructing presentation-${title.replace(/[^a-zA-Z0-9]/g, '-')}.html structure.` },
+                        { tag: 'sim-tag-html', label: 'HTML-ARCH', msg: `Applying semantic <section class="slide"> blocks and glassmorphism layout containers.` }
+                    ]
+                },
+                {
+                    agent: 'ui',
+                    label: 'UI Design Agent (ui-design.md)',
+                    percent: 74,
+                    duration: 1400,
+                    logs: [
+                        { tag: 'sim-tag-ui', label: 'UI-DESIGN', msg: `Injecting design tokens: Outfit Google Font, HSL palette (dark mode with vibrant blue/purple accents).` },
+                        { tag: 'sim-tag-ui', label: 'UI-DESIGN', msg: `Adding 8px grid spacing, teleprompter sidebar ('S' key trigger), and glassmorphism badges.` }
+                    ]
+                },
+                {
+                    agent: 'visual',
+                    label: 'Visual Designer (orchestrator.md)',
+                    percent: 86,
+                    duration: 1300,
+                    logs: [
+                        { tag: 'sim-tag-visual', label: 'VISUAL-DSN', msg: `Auditing slide contrast & visual hierarchy. Injecting subtle micro-animations (reduced-motion safe).` }
+                    ]
+                },
+                {
+                    agent: 'qa',
+                    label: 'Visual QA Inspector (orchestrator.md)',
+                    percent: 94,
+                    duration: 1200,
+                    logs: [
+                        { tag: 'sim-tag-qa', label: 'VISUAL-QA', msg: `Testing responsive breakpoints (320px to 1920px), RTL text alignment & 0 overflow errors.` },
+                        { tag: 'sim-tag-qa', label: 'VISUAL-QA', msg: `Contrast check: 100% WCAG AA compliant.` }
+                    ]
+                },
+                {
+                    agent: 'orchestrator',
+                    label: 'Final Orchestrator Output',
+                    percent: 100,
+                    duration: 800,
+                    logs: [
+                        { tag: 'sim-tag-done', label: 'ORCHESTRATOR', msg: `🎉 Validation successful! Episode file written & queued into trigger.json.` }
+                    ]
+                }
+            ];
+        }
+
+        function runSimulation(payload, jobId, filename) {
+            currentGeneratedFilename = filename;
+            currentJobId = jobId;
+            currentEpisodeNum = payload.episodeNumber || '';
+            currentTitle = payload.title || '';
+            currentPresentationUrl = null;
+            currentIndexUrl = null;
+
+            // Setup Header labels
+            document.getElementById('simTargetEp').textContent = `Episode ${payload.episodeNumber || '01'}`;
+            document.getElementById('simTargetTitle').textContent = payload.title;
+
+            // Reset UI
+            simTerminalBody.innerHTML = '';
+            simCompleteBanner.classList.remove('show');
+            simProgressFill.style.width = '0%';
+            simProgressPercent.textContent = '0%';
+            simSecondsElapsed = 0;
+            simTimer.textContent = '⏱️ 00:00';
+            setSimSpeed(1, 'btnSpeed1x');
+
+            // Reset all stage cards to pending
+            ['collector', 'structurer', 'slides', 'html', 'ui', 'visual', 'qa', 'orchestrator'].forEach(id => {
+                updateStageCard(id, 'Pending', 'pending');
+            });
+
+            // Show modal
+            simModalOverlay.classList.add('show');
+
+            // Start timer
+            if(simTimerInterval) clearInterval(simTimerInterval);
+            simTimerInterval = setInterval(() => {
+                simSecondsElapsed++;
+                const mins = String(Math.floor(simSecondsElapsed / 60)).padStart(2, '0');
+                const secs = String(simSecondsElapsed % 60).padStart(2, '0');
+                simTimer.textContent = `⏱️ ${mins}:${secs}`;
+            }, 1000);
+
+            // Run UI animation in sync with real server job
+            simStepsQueue = buildSimulationPlan(payload);
+            executeNextSimStep(0);
+
+            // Poll actual server job status
+            if(simPollInterval) clearInterval(simPollInterval);
+            simPollInterval = setInterval(() => pollJobStatus(jobId), 1200);
+        }
+
+        // Map server stage names to UI stage IDs
+        const stageMap = {
+            'collecting':    { id: 'collector',    label: 'Collector Agent' },
+            'structuring':   { id: 'structurer',   label: 'Structurer Agent' },
+            'planning':      { id: 'slides',       label: 'Slide Planner' },
+            'html_arch':     { id: 'html',         label: 'HTML Architect' },
+            'ui_design':     { id: 'ui',           label: 'UI Designer' },
+            'visual_design': { id: 'visual',       label: 'Visual Designer' },
+            'qa':            { id: 'qa',           label: 'Visual QA' },
+            'complete':      { id: 'orchestrator', label: 'Final Output' },
+        };
+
+        let lastSeenStage = null;
+
+        async function pollJobStatus(jobId) {
+            try {
+                const res = await fetch(`${API_URL.replace('/api', '')}/api/status/${jobId}`);
+                if (!res.ok) return;
+                const job = await res.json();
+
+                // Sync server stage to UI card
+                if (job.stage && job.stage !== lastSeenStage) {
+                    lastSeenStage = job.stage;
+                    const mapped = stageMap[job.stage];
+                    if (mapped) {
+                        // Mark all previous stages as done
+                        const stageOrder = Object.keys(stageMap);
+                        const currentIdx = stageOrder.indexOf(job.stage);
+                        stageOrder.slice(0, currentIdx).forEach(s => {
+                            const m = stageMap[s];
+                            if (m) updateStageCard(m.id, 'Done', 'completed');
+                        });
+                        if (job.status !== 'done') {
+                            updateStageCard(mapped.id, 'Running...', 'active');
+                        }
+                    }
+                    simCurrentAgentLabel.textContent = mapped ? mapped.label : job.stage;
+                }
+
+                // Sync progress bar to server's real progress
+                if (job.percent && job.percent > parseInt(simProgressPercent.textContent)) {
+                    simProgressFill.style.width = job.percent + '%';
+                    simProgressPercent.textContent = job.percent + '%';
+                }
+
+                if (job.status === 'done') {
+                    clearInterval(simPollInterval);
+                    currentPresentationUrl = job.presentationUrl;
+                    currentIndexUrl = job.indexUrl;
+                    // Force all stages complete
+                    Object.values(stageMap).forEach(m => updateStageCard(m.id, 'Done', 'completed'));
+                    simProgressFill.style.width = '100%';
+                    simProgressPercent.textContent = '100%';
+                    simCurrentAgentLabel.textContent = 'Presentation Ready!';
+                    appendSimLog('sim-tag-done', 'DONE', `✅ File generated: ${job.htmlFilename}`);
+                    appendSimLog('sim-tag-done', 'INDEX', '🔄 Course index auto-synced with new episode.');
+                    finishSimulation();
+                } else if (job.status === 'error') {
+                    clearInterval(simPollInterval);
+                    appendSimLog('sim-tag-qa', 'ERROR', `❌ Generation failed: ${job.error}`);
+                }
+            } catch(e) {
+                // Server might not be responding yet, silently continue
+            }
+        }
+
+        function executeNextSimStep(stepIndex) {
+            if(stepIndex >= simStepsQueue.length) {
+                // All finished!
+                finishSimulation();
+                return;
+            }
+
+            const step = simStepsQueue[stepIndex];
+            
+            // Mark stage as active
+            updateStageCard(step.agent, 'Running...', 'active');
+            simCurrentAgentLabel.textContent = step.label;
+            simProgressFill.style.width = `${step.percent}%`;
+            simProgressPercent.textContent = `${step.percent}%`;
+
+            // Stream logs for this step
+            step.logs.forEach((log, lIdx) => {
+                const logDelay = ((lIdx * 450) / simSpeedMultiplier);
+                const t = setTimeout(() => {
+                    appendSimLog(log.tag, log.label, log.msg);
+                }, logDelay);
+                simTimeouts.push(t);
+            });
+
+            // After step duration, complete this stage and go to next
+            const stepDuration = Math.max(200, step.duration / simSpeedMultiplier);
+            const nextTimeout = setTimeout(() => {
+                updateStageCard(step.agent, 'Done', 'completed');
+                executeNextSimStep(stepIndex + 1);
+            }, stepDuration);
+
+            simTimeouts.push(nextTimeout);
+        }
+
+        function fastForwardSimulation() {
+            clearSimTimeouts();
+            // Show all UI stages as done immediately (server still running real job)
+            simStepsQueue.forEach(step => {
+                updateStageCard(step.agent, 'Done', 'completed');
+                step.logs.forEach(log => appendSimLog(log.tag, log.label, log.msg));
+            });
+            simProgressFill.style.width = '94%';
+            simProgressPercent.textContent = '94%';
+            simCurrentAgentLabel.textContent = 'Waiting for file write...';
+            appendSimLog('sim-tag-done', 'SIM', 'UI fast-forwarded. Awaiting real file completion...');
+        }
+
+        function finishSimulation() {
+            if(simTimerInterval) clearInterval(simTimerInterval);
+
+            // Show real link if available
+            const bannerEl = document.getElementById('simCompleteBanner');
+            const actionsEl = bannerEl.querySelector('.sim-complete-actions');
+
+            if (currentPresentationUrl) {
+                simCompleteDesc.textContent = `✅ Presentation generated and ready!`;
+                // Add direct open button if not already there
+                if (!document.getElementById('btnOpenPresentation')) {
+                    const openBtn = document.createElement('a');
+                    openBtn.id = 'btnOpenPresentation';
+                    openBtn.href = `http://localhost:3000${currentPresentationUrl}`;
+                    openBtn.target = '_blank';
+                    openBtn.className = 'sim-action-btn';
+                    openBtn.style.textDecoration = 'none';
+                    openBtn.innerHTML = '🎯 Open Presentation';
+                    actionsEl.insertBefore(openBtn, actionsEl.firstChild);
+                }
+                if (currentIndexUrl && !document.getElementById('btnOpenIndex')) {
+                    const idxBtn = document.createElement('a');
+                    idxBtn.id = 'btnOpenIndex';
+                    idxBtn.href = `http://localhost:3000${currentIndexUrl}`;
+                    idxBtn.target = '_blank';
+                    idxBtn.className = 'sim-action-btn sim-action-btn-secondary';
+                    idxBtn.style.textDecoration = 'none';
+                    idxBtn.innerHTML = '📚 Course Index (Updated)';
+                    actionsEl.insertBefore(idxBtn, actionsEl.firstChild);
+                }
+            } else {
+                simCompleteDesc.textContent = `Presentation file is being written... Polling server.`;
+            }
+
+            simCompleteBanner.classList.add('show');
+            appendSimLog('sim-tag-done', 'READY', `Presentation ready. Click "Open Presentation" to view it directly.`);
+        }
+
+        // Copy sync prompt to clipboard
+        btnCopyPrompt.addEventListener('click', () => {
+            const promptText = `Sync: Generate presentation for Episode ${currentEpisodeNum} — ${currentTitle}`;
+            navigator.clipboard.writeText(promptText).then(() => {
+                btnCopyPrompt.innerHTML = '<span>✅ Copied Prompt!</span>';
+                showToast(`Copied: "${promptText}". Paste it in chat!`);
+                setTimeout(() => {
+                    btnCopyPrompt.innerHTML = '<span>📋 Copy Chat Sync Prompt</span>';
+                }, 3000);
+            }).catch(() => {
+                showToast('Prompt: ' + promptText);
+            });
+        });
+
+        // ==========================================
+        // PRESENTATION FORM SUBMISSION
+        // ==========================================
+        document.getElementById('presentationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Initializing Agents... ⚡';
+            btn.disabled = true;
+
+            const payload = {
+                episodeNumber: document.getElementById('episodeNumber').value,
+                title: document.getElementById('title').value,
+                language: document.getElementById('language').value,
+                content: document.getElementById('content').value,
+                script: document.getElementById('script').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/create-presentation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if(res.ok) {
+                    const data = await res.json();
+                    showToast('Agent pipeline started! Generating real presentation...', false);
+                    
+                    // Remove old dynamic links from previous run
+                    document.getElementById('btnOpenPresentation')?.remove();
+                    document.getElementById('btnOpenIndex')?.remove();
+
+                    // Launch Simulation with real jobId!
+                    runSimulation(payload, data.jobId, data.filename);
+                    
+                    // Reset form fields
+                    e.target.reset();
+                } else {
+                    showToast('Failed to start generation on backend.');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Server error. Is dashboard_server.cjs running?');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // ==========================================
+        // INDEX MODAL LOGIC
+        // ==========================================
+        const indexModal = document.getElementById('indexModal');
+        document.getElementById('btnOpenIndexModal').addEventListener('click', () => {
+            indexModal.classList.add('show');
+        });
+        document.getElementById('btnCancelIndex').addEventListener('click', () => {
+            indexModal.classList.remove('show');
+        });
+
+        document.getElementById('indexForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnConfirmIndex');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Generating... ⏳';
+            btn.disabled = true;
+
+            const payload = {
+                instructorName: document.getElementById('instructorName').value,
+                instructorRole: document.getElementById('instructorRole').value,
+                instructorSummary: document.getElementById('instructorSummary').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/generate-index`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if(res.ok) {
+                    showToast('Index page generated successfully!');
+                    indexModal.classList.remove('show');
+                } else {
+                    showToast('Failed to generate index.');
+                }
+            } catch (err) {
+                showToast('Server error. Is dashboard_server.cjs running?');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // ==========================================
+        // SUMMARY REQUEST LOGIC
+        // ==========================================
+        document.getElementById('btnSummary').addEventListener('click', async (e) => {
+            const btn = e.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Queueing... ⏳';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/request-summary`, { method: 'POST' });
+                if(res.ok) {
+                    showToast('Summary request queued!', true);
+                } else {
+                    showToast('Failed to queue summary.');
+                }
+            } catch (err) {
+                showToast('Server error. Is dashboard_server.cjs running?');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
