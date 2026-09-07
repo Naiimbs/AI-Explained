@@ -38,7 +38,28 @@ const sanitizeForFilename = (str) => {
 // ─────────────────────────────────────────────────
 // UTILITY: Parse content text into structured sections
 // ─────────────────────────────────────────────────
-async function generateSectionsWithAI(rawContent) {
+async function generateSectionsWithAI(rawContent, isDemo = false) {
+    if (isDemo) {
+        console.log("⚡ Demo Mode: Using pre-structured demo presentation sections...");
+        return [
+            {
+                title: "01 — Chatbots vs Copilots vs Agents",
+                lines: [
+                    "Chatbots: Text in, text out interfaces for simple dynamic queries.",
+                    "Copilots: Assist users in context (e.g. GitHub Copilot, Microsoft 365 Copilot).",
+                    "Agents: Goal-driven autonomous loops with tools, memory, and planning capabilities."
+                ]
+            },
+            {
+                title: "02 — How the Agentic Architecture Works",
+                lines: [
+                    "Perception & Environment Input parsing.",
+                    "LLM Reasoning Engine & Tool Selection.",
+                    "Action Execution & Verification Loop."
+                ]
+            }
+        ];
+    }
     if (!rawContent || rawContent.trim().length === 0) return [];
     
     console.log("🤖 Sending content to Gemini AI for structural analysis...");
@@ -132,7 +153,7 @@ function getEpisodeOrderNum(episodeNumber) {
 // UTILITY: Generate full presentation HTML
 // ─────────────────────────────────────────────────
 async function generatePresentationHtml(payload) {
-    const { episodeNumber, title, content, script, language } = payload;
+    const { episodeNumber, title, content, script, language, isDemo } = payload;
 
     const epNum = getEpisodeOrderNum(episodeNumber);
     const lang = language || 'Ar+En';
@@ -141,7 +162,7 @@ async function generatePresentationHtml(payload) {
     const htmlDir = isRTL ? 'rtl' : 'ltr';
 
     // Parse content into sections using AI
-    const sections = await generateSectionsWithAI(content || '');
+    const sections = await generateSectionsWithAI(content || '', isDemo);
     // Parse script
     const scriptParts = parseScriptSections(script || '', sections.length);
 
@@ -613,7 +634,7 @@ function generateAndWriteIndex(opts = {}) {
 const generationJobs = {}; // jobId → { status, stage, htmlFilename, presentationUrl }
 
 app.post('/api/create-presentation', (req, res) => {
-    const { episodeNumber, title, content, script, language } = req.body;
+    const { episodeNumber, title, content, script, language, isDemo } = req.body;
 
     if (!title || !content) {
         return res.status(400).json({ error: 'Title and content are required' });
@@ -666,7 +687,7 @@ app.post('/api/create-presentation', (req, res) => {
     cumulativeDelay += 800;
     setTimeout(async () => {
         try {
-            const html = await generatePresentationHtml({ episodeNumber, title, content, script, language });
+            const html = await generatePresentationHtml({ episodeNumber, title, content, script, language, isDemo });
             fs.writeFileSync(presentationPath, html, 'utf8');
             console.log(`[${jobId}] ✅ Written: ${presentationFilename}`);
 

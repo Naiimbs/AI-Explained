@@ -669,9 +669,14 @@
                     <textarea id="script" placeholder="Paste the script for the teleprompter panel here..."></textarea>
                 </div>
 
-                <button type="submit" class="btn" style="width: 100%;">
-                    <span>Queue Generation Task & Simulate Agent Workflow</span> 🚀
-                </button>
+                <div style="display: flex; gap: 12px; margin-top: 10px;">
+                    <button type="button" id="btnTryDemo" class="btn" style="flex: 1; background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: var(--accent); white-space: nowrap;">
+                        ✨ Try Demo (No API Key)
+                    </button>
+                    <button type="submit" class="btn" style="flex: 2;">
+                        <span>Queue Generation Task & Simulate Agent Workflow</span> 🚀
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -1276,14 +1281,27 @@
         });
 
         // ==========================================
-        // PRESENTATION FORM SUBMISSION
+        // DEMO MODE & FORM SUBMISSION
         // ==========================================
+        let isDemoMode = false;
+
+        document.getElementById('btnTryDemo').addEventListener('click', () => {
+            document.getElementById('episodeNumber').value = '01';
+            document.getElementById('title').value = 'Demo: Chatbots vs Copilots vs Agents';
+            document.getElementById('language').value = 'En';
+            document.getElementById('content').value = `01 — Introduction\nChatbots answer queries, Copilots assist inline, while AI Agents autonomously perform complex multi-step workflows.\n\n02 — Key Differences\n1. Chatbots: Reactive text-in, text-out interfaces.\n2. Copilots: Human-in-the-loop interactive assistants.\n3. Agents: Autonomous loops with planning, memory, and tool execution.`;
+            document.getElementById('script').value = `Welcome to the demo presentation! In this video, we explore the core differences between Chatbots, Copilots, and Autonomous AI Agents.`;
+            
+            isDemoMode = true;
+            document.getElementById('presentationForm').requestSubmit();
+        });
+
         document.getElementById('presentationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const btn = e.target.querySelector('button');
+            const btn = e.target.querySelector('button[type="submit"]') || e.target.querySelector('button');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'Initializing Agents... ⚡';
+            btn.innerHTML = 'Initializing Agents... 🤖';
             btn.disabled = true;
 
             const payload = {
@@ -1291,8 +1309,10 @@
                 title: document.getElementById('title').value,
                 language: document.getElementById('language').value,
                 content: document.getElementById('content').value,
-                script: document.getElementById('script').value
+                script: document.getElementById('script').value,
+                isDemo: isDemoMode
             };
+            isDemoMode = false;
 
             try {
                 const res = await fetch(`${API_URL}/create-presentation`, {
