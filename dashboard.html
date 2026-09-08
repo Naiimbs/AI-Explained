@@ -875,7 +875,9 @@
     </div>
 
     <script>
-        const API_URL = window.location.origin.startsWith('http') ? `${window.location.origin}/api` : '/api';
+        const API_URL = (window.location.protocol.startsWith('http') && window.location.origin !== 'null') 
+            ? `${window.location.origin}/api` 
+            : 'http://localhost:3000/api';
         
         function showToast(message, requireSync = false) {
             const toast = document.getElementById('toast');
@@ -1333,11 +1335,12 @@
                     // Reset form fields
                     e.target.reset();
                 } else {
-                    showToast('Failed to start generation on backend.');
+                    const errData = await res.json().catch(() => ({}));
+                    showToast('Failed to start: ' + (errData.error || res.statusText));
                 }
             } catch (err) {
                 console.error(err);
-                showToast('Server error. Is dashboard_server.cjs running?');
+                showToast(`Server connection error: ${err.message}. Make sure the server is running.`);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
