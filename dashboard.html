@@ -1129,7 +1129,7 @@
 
         async function pollJobStatus(jobId) {
             try {
-                const res = await fetch(`${API_URL.replace('/api', '')}/api/status/${jobId}`);
+                const res = await fetch(`${API_URL}/status/${jobId}`);
                 if (!res.ok) return;
                 const job = await res.json();
 
@@ -1239,7 +1239,7 @@
                 if (!document.getElementById('btnOpenPresentation')) {
                     const openBtn = document.createElement('a');
                     openBtn.id = 'btnOpenPresentation';
-                    openBtn.href = `http://localhost:3000${currentPresentationUrl}`;
+                    openBtn.href = currentPresentationUrl;
                     openBtn.target = '_blank';
                     openBtn.className = 'sim-action-btn';
                     openBtn.style.textDecoration = 'none';
@@ -1249,7 +1249,7 @@
                 if (currentIndexUrl && !document.getElementById('btnOpenIndex')) {
                     const idxBtn = document.createElement('a');
                     idxBtn.id = 'btnOpenIndex';
-                    idxBtn.href = `http://localhost:3000${currentIndexUrl}`;
+                    idxBtn.href = currentIndexUrl;
                     idxBtn.target = '_blank';
                     idxBtn.className = 'sim-action-btn sim-action-btn-secondary';
                     idxBtn.style.textDecoration = 'none';

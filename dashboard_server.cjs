@@ -9,8 +9,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const PRESENTATIONS_DIR = path.join(__dirname, 'presentations');
 
-// Initialize Gemini (needs GEMINI_API_KEY env var)
-const ai = new GoogleGenAI({});
+// Initialize Gemini safely only if GEMINI_API_KEY is configured
+let ai = null;
+if (process.env.GEMINI_API_KEY) {
+    try {
+        ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        console.log("✅ Google Gemini AI initialized with API Key.");
+    } catch(e) {
+        console.warn("⚠️ Could not initialize GoogleGenAI:", e.message);
+    }
+} else {
+    console.log("ℹ️ Running without GEMINI_API_KEY. Presentations will use built-in structural parsing or Demo Mode.");
+}
 
 app.use(cors());
 app.use(express.json());
@@ -66,6 +76,11 @@ async function generateSectionsWithAI(rawContent, isDemo = false) {
         ];
     }
     if (!rawContent || rawContent.trim().length === 0) return [];
+
+    if (!ai || !process.env.GEMINI_API_KEY) {
+        console.log("ℹ️ No GEMINI_API_KEY set — structuring content via built-in parser.");
+        return parseContentIntoSections(rawContent);
+    }
     
     console.log("🤖 Sending content to Gemini AI for structural analysis...");
     const prompt = `You are a structural AI agent. Analyze the following presentation text and break it down into an array of sections. 
@@ -87,7 +102,7 @@ ${rawContent.substring(0, 10000)}`;
         console.log(`🤖 Gemini successfully generated ${sections.length} sections!`);
         return sections;
     } catch (err) {
-        console.error("❌ Gemini AI parsing failed, falling back to basic regex.", err.message);
+        console.error("❌ Gemini AI parsing failed, falling back to basic parser.", err.message);
         return parseContentIntoSections(rawContent);
     }
 }
