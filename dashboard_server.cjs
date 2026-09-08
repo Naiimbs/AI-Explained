@@ -55,37 +55,91 @@ const sanitizeForFilename = (str) => {
 // ─────────────────────────────────────────────────
 async function generateSectionsWithAI(rawContent, isDemo = false) {
     if (isDemo) {
-        console.log("⚡ Demo Mode: Using pre-structured demo presentation sections...");
+        console.log("⚡ Demo Mode: Using rich pre-structured demo presentation sections...");
         return [
             {
                 title: "01 — Chatbots vs Copilots vs Agents",
-                lines: [
-                    "Chatbots: Text in, text out interfaces for simple dynamic queries.",
-                    "Copilots: Assist users in context (e.g. GitHub Copilot, Microsoft 365 Copilot).",
-                    "Agents: Goal-driven autonomous loops with tools, memory, and planning capabilities."
+                badge: "COMPARISON",
+                subtitle: "The Three Evolutionary Phases of AI Interactions",
+                archetype: "comparison",
+                points: [
+                    { lead: "Chatbots (Reactive)", text: "Text in, text out interfaces for simple dynamic queries without state." },
+                    { lead: "Copilots (Context-Aware)", text: "Assist users inline with full contextual awareness (e.g. GitHub Copilot)." },
+                    { lead: "Agents (Autonomous)", text: "Goal-driven loops equipped with reasoning, memory, tools, and multi-step execution." }
+                ],
+                comparison: {
+                    leftTitle: "Chatbots & Copilots",
+                    leftBadge: "Human-Driven",
+                    leftItems: ["Single-turn question & response", "Requires human for every single step", "No external system write actions", "Stateless / ephemeral context"],
+                    rightTitle: "Autonomous AI Agents",
+                    rightBadge: "Goal-Driven",
+                    rightItems: ["Multi-turn autonomous planning loop", "Executes tools & writes to databases", "Self-corrects upon receiving errors", "Maintains short & long-term memory"]
+                }
+            },
+            {
+                title: "02 — The Autonomous Agentic Loop",
+                badge: "ARCHITECTURE",
+                subtitle: "How Agents Reason, Execute Tools, and Verify Outcomes",
+                archetype: "flow",
+                points: [
+                    { lead: "Perception & Input", text: "Ingests user request, environmental context, and memory state." },
+                    { lead: "Reasoning & Plan", text: "LLM determines the necessary sequence of actions and tool calls." },
+                    { lead: "Tool Execution", text: "Calls real APIs, databases, or local scripts to perform real-world actions." },
+                    { lead: "Observation & Feedback", text: "Inspects output, verifies success, and iterates until the goal is met." }
+                ],
+                flowSteps: [
+                    { num: "01", name: "User Goal", desc: "Intent & Constraints", icon: "🎯" },
+                    { num: "02", name: "Reasoning (LLM)", desc: "Decide Next Tool", icon: "🧠" },
+                    { num: "03", name: "Tool Execution", desc: "API / Database Call", icon: "🔧" },
+                    { num: "04", name: "Goal Verified", desc: "Observation & Output", icon: "✅" }
                 ]
             },
             {
-                title: "02 — How the Agentic Architecture Works",
-                lines: [
-                    "Perception & Environment Input parsing.",
-                    "LLM Reasoning Engine & Tool Selection.",
-                    "Action Execution & Verification Loop."
-                ]
+                title: "03 — SKILL.md Standard & Agent Capabilities",
+                badge: "SPECIFICATION",
+                subtitle: "Turning Plain Documentation into Executable Agent Skills",
+                archetype: "code",
+                points: [
+                    { lead: "Progressive Disclosure", text: "Frontmatter metadata is indexed first; body is loaded only when required." },
+                    { lead: "Executable Instructions", text: "Transforms manual runbooks into deterministic steps for AI agents." },
+                    { lead: "Tool & Script Binding", text: "Binds Python/Node.js helper scripts to complex multi-step workflows." }
+                ],
+                codeSnippet: `---
+name: generate-presentation
+description: Transform raw text into interactive HTML presentation slides
+---
+# Workflow Instructions
+1. Ingest & clean input content
+2. Send to Gemini AI for structural segmentation
+3. Apply slide archetypes (Hero, Flow, Steps, Comparison)
+4. Compile responsive glassmorphic HTML with Presenter Script`
             }
         ];
     }
+
     if (!rawContent || rawContent.trim().length === 0) return [];
 
     if (!ai || !process.env.GEMINI_API_KEY) {
-        console.log("ℹ️ No GEMINI_API_KEY set — structuring content via built-in parser.");
+        console.log("ℹ️ No GEMINI_API_KEY set — structuring content with rich built-in parser.");
         return parseContentIntoSections(rawContent);
     }
     
-    console.log("🤖 Sending content to Gemini AI for structural analysis...");
-    const prompt = `You are a structural AI agent. Analyze the following presentation text and break it down into an array of sections. 
-Each section should have a "title" and an array of "lines" (bullet points, max 8 short points per section). Extract the most important concepts.
-Respond ONLY with a valid JSON array of objects, e.g. [{"title": "Introduction", "lines": ["Point 1", "Point 2"]}]. Do not wrap in markdown tags like \`\`\`json.
+    console.log("🤖 Sending content to Gemini AI for deep structural analysis...");
+    const prompt = `You are an expert AI presentation architect and UX designer.
+Analyze the following presentation text and transform it into a rich JSON array of slide sections.
+
+Each section MUST be a JSON object with:
+- "title": Clear, engaging section title (e.g. "01 — Concept Hook")
+- "badge": 1-word tag ("CONCEPT" | "ARCHITECTURE" | "WORKFLOW" | "COMPARISON" | "TECHNICAL" | "UX")
+- "subtitle": 1 short sentence summarizing the core insight
+- "archetype": choose the best match from ["flow", "steps", "comparison", "code", "breakdown"]
+- "points": array of 3-4 objects: [{ "lead": "Short bold keyphrase", "text": "Detailed explanation sentence" }]
+- If archetype is "flow": include "flowSteps": [{ "num": "01", "name": "Step Name", "desc": "Short description", "icon": "emoji" }] (3-4 items)
+- If archetype is "steps": include "stepCards": [{ "num": "01", "title": "...", "desc": "..." }] (3-4 items)
+- If archetype is "comparison": include "comparison": { "leftTitle": "...", "leftBadge": "...", "leftItems": ["..."], "rightTitle": "...", "rightBadge": "...", "rightItems": ["..."] }
+- If archetype is "code": include "codeSnippet": "clean code or yaml or schema example"
+
+Respond ONLY with a valid JSON array of objects. Do not wrap in markdown or backticks.
 
 Text to analyze:
 ${rawContent.substring(0, 10000)}`;
@@ -97,57 +151,146 @@ ${rawContent.substring(0, 10000)}`;
         });
         
         let text = response.text || '';
-        text = text.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+        text = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
         const sections = JSON.parse(text);
-        console.log(`🤖 Gemini successfully generated ${sections.length} sections!`);
+        console.log(`🤖 Gemini generated ${sections.length} rich multi-archetype sections!`);
         return sections;
     } catch (err) {
-        console.error("❌ Gemini AI parsing failed, falling back to basic parser.", err.message);
+        console.error("❌ Gemini AI parsing failed, falling back to smart parser.", err.message);
         return parseContentIntoSections(rawContent);
     }
 }
+
 function parseContentIntoSections(rawContent) {
-    // Split by numbered section headers like "01 —", "02 —" etc.
-    const sections = [];
+    const rawSections = [];
     const lines = rawContent.split('\n');
-    let currentSection = null;
+    let currentTitle = null;
     let currentLines = [];
 
     for (const line of lines) {
-        const sectionMatch = line.match(/^(\d{2})\s*[—–-]\s*(.+)/);
+        const sectionMatch = line.match(/^(\d{1,2}|#+)\s*[—–\-.:]\s*(.+)/) || line.match(/^(?:Section|Part|Episode|الحلقة|مفهوم)\s*(\d*)\s*[—–\-.:]\s*(.+)/i);
         if (sectionMatch) {
-            if (currentSection) {
-                sections.push({ title: currentSection, lines: currentLines });
+            if (currentTitle) {
+                rawSections.push({ title: currentTitle, lines: currentLines });
             }
-            currentSection = line.trim();
+            currentTitle = line.trim().replace(/^#+\s*/, '');
             currentLines = [];
         } else {
             if (line.trim()) currentLines.push(line.trim());
         }
     }
-    if (currentSection) {
-        sections.push({ title: currentSection, lines: currentLines });
+    if (currentTitle) {
+        rawSections.push({ title: currentTitle, lines: currentLines });
     }
 
-    // If no numbered sections, split into chunks by double newline groups
-    if (sections.length === 0) {
+    if (rawSections.length === 0) {
         const paragraphs = rawContent.split(/\n{2,}/).filter(p => p.trim());
         paragraphs.forEach((p, i) => {
-            sections.push({ title: `Part ${i + 1}`, lines: p.split('\n').filter(l => l.trim()) });
+            const pLines = p.split('\n').filter(l => l.trim());
+            rawSections.push({
+                title: pLines[0] ? pLines[0].substring(0, 60) : `Part ${i + 1}`,
+                lines: pLines.slice(1)
+            });
         });
     }
 
-    return sections;
+    // Transform raw sections into rich archetype objects
+    return rawSections.map((sec, idx) => {
+        const titleLower = sec.title.toLowerCase();
+        const fullText = sec.lines.join(' ');
+        let archetype = 'flow';
+        let badge = 'CONCEPT';
+
+        if (titleLower.includes('vs') || titleLower.includes('فرق') || titleLower.includes('مقارنة') || titleLower.includes('differ')) {
+            archetype = 'comparison';
+            badge = 'COMPARISON';
+        } else if (titleLower.includes('step') || titleLower.includes('خطو') || titleLower.includes('work') || titleLower.includes('process') || titleLower.includes('loop')) {
+            archetype = 'steps';
+            badge = 'WORKFLOW';
+        } else if (titleLower.includes('code') || titleLower.includes('skill') || titleLower.includes('yaml') || titleLower.includes('json') || titleLower.includes('api') || fullText.includes('```')) {
+            archetype = 'code';
+            badge = 'TECHNICAL';
+        } else if (idx % 2 === 1) {
+            archetype = 'flow';
+            badge = 'ARCHITECTURE';
+        } else {
+            archetype = 'breakdown';
+            badge = 'DEEP DIVE';
+        }
+
+        // Extract structured points with bold leads
+        const points = sec.lines.slice(0, 5).map((l, lIdx) => {
+            const parts = l.split(/[:—–-]\s+/);
+            if (parts.length > 1) {
+                return {
+                    lead: parts[0].replace(/^[\d.*•-]+\s*/, '').trim(),
+                    text: parts.slice(1).join(' - ').trim()
+                };
+            }
+            return {
+                lead: `Core Insight #${lIdx + 1}`,
+                text: l.replace(/^[\d.*•-]+\s*/, '').trim()
+            };
+        });
+
+        // Generate archetype-specific visuals
+        const result = {
+            title: sec.title,
+            badge: badge,
+            subtitle: points[0] ? points[0].text.substring(0, 90) + '...' : 'Key conceptual breakdown for this section.',
+            archetype: archetype,
+            points: points.length > 0 ? points : [{ lead: "Main Takeaway", text: sec.title }]
+        };
+
+        if (archetype === 'flow') {
+            result.flowSteps = [
+                { num: "01", name: "Input & Context", desc: "User intent & data", icon: "📥" },
+                { num: "02", name: "Reasoning Engine", desc: "Decision & Planning", icon: "🧠" },
+                { num: "03", name: "Tool Execution", desc: "API / Action triggers", icon: "⚡" },
+                { num: "04", name: "Observation & Goal", desc: "Verification loop", icon: "🎯" }
+            ];
+        } else if (archetype === 'steps') {
+            result.stepCards = (points.length >= 3 ? points.slice(0, 4) : [
+                { lead: "Phase 1", text: "Preparation and requirement analysis" },
+                { lead: "Phase 2", text: "Core execution and parameter mapping" },
+                { lead: "Phase 3", text: "Validation and result verification" },
+                { lead: "Phase 4", text: "Continuous feedback loop" }
+            ]).map((p, pIdx) => ({
+                num: `0${pIdx + 1}`,
+                title: p.lead,
+                desc: p.text
+            }));
+        } else if (archetype === 'comparison') {
+            result.comparison = {
+                leftTitle: "Traditional Systems",
+                leftBadge: "Static / Manual",
+                leftItems: ["Fixed deterministic scripts", "No self-correcting error handling", "Human required for every branch"],
+                rightTitle: "AI Agent Architecture",
+                rightBadge: "Autonomous / Adaptive",
+                rightItems: ["Dynamic tool invocation based on goal", "Automatic reasoning & error recovery", "Operates independently toward objectives"]
+            };
+        } else if (archetype === 'code') {
+            result.codeSnippet = `# Specification & Configuration
+name: ${sec.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}
+version: "2.0"
+execution_mode: "autonomous"
+tools:
+  - name: "system_search"
+  - name: "execute_action"
+instructions: |
+  1. Inspect incoming context
+  2. Synthesize structured plan
+  3. Verify output matches requirements`;
+        }
+
+        return result;
+    });
 }
 
-// ─────────────────────────────────────────────────
-// UTILITY: Parse script sections from script text
-// ─────────────────────────────────────────────────
 function parseScriptSections(rawScript, slideCount) {
     if (!rawScript || rawScript.trim() === '-' || rawScript.trim().length < 10) {
         return [];
     }
-    // Split by markdown headers
     const parts = rawScript.split(/^##\s+/m).filter(p => p.trim());
     return parts.map((part, i) => {
         const firstLine = part.split('\n')[0].trim();
@@ -160,18 +303,12 @@ function parseScriptSections(rawScript, slideCount) {
     });
 }
 
-// ─────────────────────────────────────────────────
-// UTILITY: Get episode number from existing presentations
-// ─────────────────────────────────────────────────
 function getEpisodeOrderNum(episodeNumber) {
     if (!episodeNumber) return '01';
     const num = parseInt(episodeNumber, 10);
     return isNaN(num) ? episodeNumber : String(num).padStart(2, '0');
 }
 
-// ─────────────────────────────────────────────────
-// UTILITY: Generate full presentation HTML
-// ─────────────────────────────────────────────────
 async function generatePresentationHtml(payload) {
     const { episodeNumber, title, content, script, language, isDemo } = payload;
 
@@ -181,137 +318,290 @@ async function generatePresentationHtml(payload) {
     const htmlLang = isRTL ? 'ar' : 'en';
     const htmlDir = isRTL ? 'rtl' : 'ltr';
 
-    // Parse content into sections using AI
+    // Parse content into rich sections
     const sections = await generateSectionsWithAI(content || '', isDemo);
-    // Parse script
     const scriptParts = parseScriptSections(script || '', sections.length);
 
-    // Generate slides HTML
     let slidesHtml = '';
 
-    // Slide 0: Hero
+    // ── SLIDE 0: HERO SLIDE ──
+    const agendaChips = sections.slice(0, 4).map((s, idx) => 
+        `<span style="display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;background:var(--bg-1);border:1px solid var(--border-med);border-radius:var(--r-pill);font-size:.78rem;font-weight:700;color:var(--ts);">
+          <span style="color:var(--tool);">${String(idx + 1).padStart(2, '0')}</span> ${s.title.replace(/^\d+\s*[—–-]\s*/, '').substring(0, 24)}
+        </span>`
+    ).join('');
+
     slidesHtml += `
   <!-- SLIDE 0: Hero -->
   <section class="slide active" id="slide-0">
-    <div class="con" style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:75vh;text-align:center;gap:var(--s6);">
+    <div class="con" style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:80vh;text-align:center;gap:var(--s5);">
       <div class="reveal">
         <div class="hero-badge">
-          <span style="color:var(--brain);">🎓</span>
-          <span style="font-weight:700;">AI Presentation Agent</span>
-          <span style="padding:.1rem .6rem;background:var(--tool-muted);color:var(--tool);border-radius:var(--r-pill);font-size:.75rem;font-weight:700;">EP ${epNum}</span>
+          <span style="font-size:1.1rem;">🎓</span>
+          <span style="font-weight:800;letter-spacing:.04em;text-transform:uppercase;">AI Explained by a UX Designer</span>
+          <span style="padding:.15rem .65rem;background:var(--tool-muted);color:var(--tool);border-radius:var(--r-pill);font-size:.75rem;font-weight:800;border:1px solid rgba(2,132,199,0.2);">EP ${epNum}</span>
         </div>
       </div>
-      <h1 class="t-display reveal" style="color:var(--tool);max-width:800px;">${title}</h1>
-      <p class="t-body reveal" style="color:var(--ts);max-width:600px;">${lang === 'Ar+En' ? 'شرح مفصل بالدارجة — مصطلحات تقنية بالإنجليزية' : lang === 'Ar' ? 'شرح مفصل بالعربية' : 'A UX Designer\'s perspective on AI'}</p>
-      <div class="reveal" style="display:flex;gap:var(--s4);flex-wrap:wrap;justify-content:center;margin-top:var(--s4);">
-        <span style="padding:.4rem 1rem;background:var(--brain-muted);color:var(--brain);border-radius:var(--r-pill);font-size:.85rem;font-weight:600;">Episode ${epNum}</span>
-        <span style="padding:.4rem 1rem;background:var(--tool-muted);color:var(--tool);border-radius:var(--r-pill);font-size:.85rem;font-weight:600;">← Previous</span>
-        <span style="padding:.4rem 1rem;background:var(--app-muted);color:var(--app);border-radius:var(--r-pill);font-size:.85rem;font-weight:600;">Next →</span>
+      
+      <h1 class="t-display reveal" style="color:var(--tp);max-width:920px;">
+        ${title}
+      </h1>
+      
+      <p class="t-body reveal" style="color:var(--ts);max-width:680px;font-size:1.1rem;">
+        ${lang === 'Ar+En' ? 'دليل عملي تفاعلي مدعوم بنماذج بصرية وتصميم أنظمة الذكاء الاصطناعي الحديثة.' : lang === 'Ar' ? 'شرح مفصل بالعربية وتطبيق عملي لهندسة النظم الذكية.' : 'A deep, visual dive into modern autonomous AI systems and UX principles.'}
+      </p>
+
+      <div class="reveal" style="display:flex;gap:var(--s2);flex-wrap:wrap;justify-content:center;margin-top:var(--s3);max-width:800px;">
+        ${agendaChips}
+      </div>
+
+      <div class="reveal" style="display:flex;gap:var(--s3);align-items:center;margin-top:var(--s4);">
+        <button onclick="showSlide(1)" class="btn-primary-action">
+          <span>Start Presentation ➔</span>
+        </button>
+        <span class="t-xs" style="color:var(--tm);font-weight:600;">Use <strong>← / →</strong> or <strong>Space</strong> to navigate • Press <strong>S</strong> for Script</span>
       </div>
     </div>
   </section>`;
 
-    // Content slides
+    // ── DYNAMIC CONTENT SLIDES ──
     sections.slice(0, 18).forEach((sec, i) => {
         const slideIdx = i + 1;
-        const bulletItems = sec.lines
-            .filter(l => l.length > 1)
-            .slice(0, 8)
-            .map(l => {
-                // Detect if it's a comparison/key item
-                const isKey = l.includes('→') || l.includes('=') || l.match(/^\d+\./);
-                return `<li style="margin-bottom:.5rem;${isKey ? 'font-weight:700;' : ''}">${l.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`;
-            }).join('');
+        const archetype = sec.archetype || 'flow';
+        const badgeColor = sec.badge === 'COMPARISON' ? 'st-app' : sec.badge === 'WORKFLOW' ? 'st-tool' : sec.badge === 'TECHNICAL' ? 'st-warn' : 'st-brain';
+
+        // Left Points Column
+        const pointsListHtml = (sec.points || []).map((p, pIdx) => `
+          <div class="point-item reveal">
+            <div class="point-bullet">
+              <span>${pIdx + 1}</span>
+            </div>
+            <div class="point-body">
+              <div class="point-lead">${p.lead || `Key Point ${pIdx + 1}`}</div>
+              <div class="point-desc">${p.text || ''}</div>
+            </div>
+          </div>
+        `).join('');
+
+        let visualBlockHtml = '';
+
+        if (archetype === 'flow' && sec.flowSteps) {
+            // Interactive Architectural Flow
+            const flowNodes = sec.flowSteps.map((st, sIdx) => `
+              <div class="flow-node">
+                <div class="flow-node-icon">${st.icon || '⚡'}</div>
+                <div class="flow-node-num">STEP ${st.num}</div>
+                <div class="flow-node-name">${st.name}</div>
+                <div class="flow-node-desc">${st.desc}</div>
+              </div>
+              ${sIdx < sec.flowSteps.length - 1 ? `<div class="flow-connector">➔</div>` : ''}
+            `).join('');
+
+            visualBlockHtml = `
+              <div class="mock-window reveal">
+                <div class="mock-header">
+                  <div class="mock-dots">
+                    <span class="mock-dot r"></span>
+                    <span class="mock-dot y"></span>
+                    <span class="mock-dot g"></span>
+                  </div>
+                  <div class="mock-title">SYSTEM ARCHITECTURE PIPELINE</div>
+                  <span class="live-pill">● LIVE PIPELINE</span>
+                </div>
+                <div class="mock-body">
+                  <div class="flow-track">
+                    ${flowNodes}
+                  </div>
+                </div>
+              </div>`;
+        } else if (archetype === 'steps' && sec.stepCards) {
+            // Numbered 4-card sequence
+            const cards = sec.stepCards.map(c => `
+              <div class="step-card reveal">
+                <div class="step-card-num">${c.num}</div>
+                <div class="step-card-title">${c.title}</div>
+                <div class="step-card-desc">${c.desc}</div>
+              </div>
+            `).join('');
+
+            visualBlockHtml = `
+              <div class="step-grid">
+                ${cards}
+              </div>`;
+        } else if (archetype === 'comparison' && sec.comparison) {
+            // Side-by-Side Comparison Matrix
+            const cmp = sec.comparison;
+            visualBlockHtml = `
+              <div class="cmp-grid reveal">
+                <div class="cmp-card cmp-left">
+                  <div class="cmp-header">
+                    <div class="cmp-badge-left">${cmp.leftBadge || 'Traditional'}</div>
+                    <div class="cmp-title">${cmp.leftTitle}</div>
+                  </div>
+                  <ul class="cmp-list">
+                    ${(cmp.leftItems || []).map(it => `<li><span style="color:var(--danger);font-weight:700;">✕</span> ${it}</li>`).join('')}
+                  </ul>
+                </div>
+                <div class="cmp-card cmp-right">
+                  <div class="cmp-header">
+                    <div class="cmp-badge-right">${cmp.rightBadge || 'Next-Gen Agent'}</div>
+                    <div class="cmp-title">${cmp.rightTitle}</div>
+                  </div>
+                  <ul class="cmp-list">
+                    ${(cmp.rightItems || []).map(it => `<li><span style="color:var(--app);font-weight:700;">✓</span> ${it}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>`;
+        } else if (archetype === 'code' && sec.codeSnippet) {
+            // Technical Code Window Mockup
+            visualBlockHtml = `
+              <div class="mock-window reveal">
+                <div class="mock-header">
+                  <div class="mock-dots">
+                    <span class="mock-dot r"></span>
+                    <span class="mock-dot y"></span>
+                    <span class="mock-dot g"></span>
+                  </div>
+                  <div class="mock-title">SPECIFICATION SCHEMA</div>
+                  <span class="code-lang-tag">YAML / MARKDOWN</span>
+                </div>
+                <div class="mock-code-body">
+                  <pre><code>${sec.codeSnippet.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+                </div>
+              </div>`;
+        } else {
+            // Breakdown Feature Highlight Cards
+            visualBlockHtml = `
+              <div class="breakdown-grid reveal">
+                <div class="feature-box feat-blue">
+                  <div class="feat-icon">⚡</div>
+                  <div class="feat-title">Reasoning & Perception</div>
+                  <div class="feat-desc">Autonomous multi-step planning and runtime validation.</div>
+                </div>
+                <div class="feature-box feat-purple">
+                  <div class="feat-icon">🧠</div>
+                  <div class="feat-title">State & Memory Loop</div>
+                  <div class="feat-desc">Maintains persistent operational context and error recovery.</div>
+                </div>
+                <div class="feature-box feat-green">
+                  <div class="feat-icon">🎯</div>
+                  <div class="feat-title">Action Execution</div>
+                  <div class="feat-desc">Direct interface with tools, APIs, and real-world infrastructure.</div>
+                </div>
+              </div>`;
+        }
 
         slidesHtml += `
-  <!-- SLIDE ${slideIdx} -->
+  <!-- SLIDE ${slideIdx}: ${sec.title} -->
   <section class="slide" id="slide-${slideIdx}">
     <div class="con">
       <div class="sh">
-        <div class="stag st-brain reveal">📍 ${sec.title}</div>
+        <div class="stag ${badgeColor} reveal">📍 ${sec.badge || 'CONCEPT'} • ${String(slideIdx).padStart(2, '0')}</div>
+        <h2 class="t-h1 reveal" style="color:var(--tp);margin-bottom:.4rem;">${sec.title}</h2>
+        <p class="t-sm reveal" style="color:var(--ts);max-width:700px;margin:0 auto;">${sec.subtitle || ''}</p>
       </div>
-      <div class="g2">
-        <div class="gc reveal" style="border-right:3px solid var(--brain);">
-          <ul style="list-style:none;padding:0;margin:0;line-height:2;">
-            ${bulletItems || '<li style="color:var(--ts);">—</li>'}
-          </ul>
+
+      <div class="g2-rich">
+        <!-- Structured Concepts Column -->
+        <div class="gc reveal points-container">
+          <div class="points-header">
+            <span class="points-header-icon">💡</span>
+            <span class="points-header-title">Core Principles & Logic</span>
+          </div>
+          <div class="points-list">
+            ${pointsListHtml}
+          </div>
         </div>
-        <div class="gc reveal" style="background:var(--bg-1);display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:160px;gap:var(--s4);">
-          <div style="font-size:3rem;opacity:.15;">🧠</div>
-          <p class="t-sm" style="color:var(--ts);text-align:center;margin:0;">Episode ${epNum} — ${title}</p>
+
+        <!-- Dynamic Visual Archetype Column -->
+        <div class="visual-container">
+          ${visualBlockHtml}
         </div>
       </div>
     </div>
   </section>`;
     });
 
-    // Key Takeaways slide
+    // ── KEY TAKEAWAYS SLIDE ──
     const lastIdx = Math.min(sections.length, 18) + 1;
     slidesHtml += `
   <!-- SLIDE ${lastIdx}: Key Takeaways -->
   <section class="slide" id="slide-${lastIdx}">
     <div class="con">
       <div class="sh">
-        <div class="stag st-app reveal">🎯 Key Takeaways</div>
-        <h2 class="t-h1 reveal" style="color:var(--app);">ما تخرجش من الحلقة بدون...</h2>
+        <div class="stag st-app reveal">🎯 Summary • Key Takeaways</div>
+        <h2 class="t-h1 reveal" style="color:var(--tp);">النقاط الجوهرية التي يجب تذكرها</h2>
+        <p class="t-sm reveal" style="color:var(--ts);">Core conceptual takeaways for Episode ${epNum}</p>
       </div>
       <div class="g3">
-        <div class="gc reveal" style="border-top:3px solid var(--tool);text-align:center;">
-          <div style="font-size:2rem;margin-bottom:.75rem;">🔍</div>
+        <div class="gc reveal" style="border-top:4px solid var(--tool);display:flex;flex-direction:column;gap:var(--s3);">
+          <div style="font-size:2.2rem;">🔍</div>
           <div class="t-h3" style="color:var(--tool);">${title}</div>
-          <p class="t-sm" style="color:var(--ts);margin-top:.5rem;">Episode ${epNum} — Core Concept</p>
+          <p class="t-sm" style="color:var(--ts);line-height:1.7;">الـAgent لا يتبع مساراً ثابتاً، بل يتكيف ذاتياً مع المعطيات والنتائج.</p>
+          <div style="margin-top:auto;"><span class="tag-pill" style="background:var(--tool-muted);color:var(--tool);">CORE PRINCIPLE</span></div>
         </div>
-        <div class="gc reveal" style="border-top:3px solid var(--brain);text-align:center;">
-          <div style="font-size:2rem;margin-bottom:.75rem;">🧠</div>
-          <div class="t-h3" style="color:var(--brain);">Context ≠ Memory ≠ RAG</div>
-          <p class="t-sm" style="color:var(--ts);margin-top:.5rem;">Three distinct information systems</p>
+        <div class="gc reveal" style="border-top:4px solid var(--brain);display:flex;flex-direction:column;gap:var(--s3);">
+          <div style="font-size:2.2rem;">🧠</div>
+          <div class="t-h3" style="color:var(--brain);">Context vs Memory vs Tools</div>
+          <p class="t-sm" style="color:var(--ts);line-height:1.7;">فصل طبقات الإدراك والتنفيذ يمنح الوكلاء الذكاء والاستقرار التشغيلي.</p>
+          <div style="margin-top:auto;"><span class="tag-pill" style="background:var(--brain-muted);color:var(--brain);">ARCHITECTURE</span></div>
         </div>
-        <div class="gc reveal" style="border-top:3px solid var(--app);text-align:center;">
-          <div style="font-size:2rem;margin-bottom:.75rem;">🎨</div>
-          <div class="t-h3" style="color:var(--app);">UX = Transparency</div>
-          <p class="t-sm" style="color:var(--ts);margin-top:.5rem;">Make AI behavior visible to users</p>
+        <div class="gc reveal" style="border-top:4px solid var(--app);display:flex;flex-direction:column;gap:var(--s3);">
+          <div style="font-size:2.2rem;">🎨</div>
+          <div class="t-h3" style="color:var(--app);">UX Transparency</div>
+          <p class="t-sm" style="color:var(--ts);line-height:1.7;">جعل خطوات الوكيل الذكي مرئية للمستخدم يرفع مستوى الثقة والتحكم.</p>
+          <div style="margin-top:auto;"><span class="tag-pill" style="background:var(--app-muted);color:var(--app);">UX VALUE</span></div>
         </div>
       </div>
     </div>
   </section>`;
 
-    // Final slide: Next Episode hook
+    // ── FINAL SLIDE: NEXT EPISODE ──
     const finalIdx = lastIdx + 1;
     slidesHtml += `
-  <!-- SLIDE ${finalIdx}: End Hook -->
+  <!-- SLIDE ${finalIdx}: Next Episode Hook -->
   <section class="slide" id="slide-${finalIdx}">
-    <div class="con" style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:75vh;text-align:center;gap:var(--s6);">
+    <div class="con" style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:75vh;text-align:center;gap:var(--s5);">
       <div class="reveal">
-        <div style="font-size:3rem;margin-bottom:var(--s4);">🔗</div>
-        <div class="stag st-tool">Next Episode</div>
+        <div style="font-size:3.5rem;margin-bottom:var(--s3);">🚀</div>
+        <div class="stag st-tool">Next Episode Preview</div>
       </div>
-      <h2 class="t-h1 reveal" style="color:var(--tp);">ما يجي...</h2>
-      <p class="t-body reveal" style="color:var(--ts);max-width:550px;">Episode ${String(parseInt(epNum, 10) + 1).padStart(2, '0')} — ننتقلو للمرحلة الجاية في فهم الـAI Agents</p>
-      <a href="index.html" class="reveal" style="display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.4rem;background:var(--tool);color:#fff;border-radius:var(--r-pill);text-decoration:none;font-weight:700;font-size:.9rem;transition:all .2s;">
-        📚 Back to Course Index
-      </a>
+      <h2 class="t-display reveal" style="color:var(--tp);font-size:clamp(2rem,5vw,3.2rem);">What's Coming Next?</h2>
+      <p class="t-body reveal" style="color:var(--ts);max-width:600px;font-size:1.1rem;">
+        Episode ${String(parseInt(epNum, 10) + 1).padStart(2, '0')} — سنستكشف المفاهيم المتقدمة لبناء الأنظمة الذكية وتكامل الذاكرة.
+      </p>
+      <div class="reveal" style="display:flex;gap:var(--s3);align-items:center;margin-top:var(--s3);">
+        <a href="index.html" class="btn-primary-action" style="text-decoration:none;">
+          <span>📚 Back to Course Index</span>
+        </a>
+      </div>
     </div>
   </section>`;
 
     const totalSlides = finalIdx + 1;
 
-    // Nav pills (first 8 sections max for nav)
-    const navSections = ['Hero', ...sections.slice(0, 6).map(s => s.title.replace(/^\d+\s*[—–-]\s*/, '')), 'Takeaways', 'Next'];
-    const navPills = navSections.map((name, i) =>
-        `<button class="np${i === 0 ? ' current' : ''}" data-index="${i}" title="${name}">${String(i + 1).padStart(2, '0')}</button>`
+    // Navigation pills
+    const navSections = ['Intro', ...sections.slice(0, 10).map((s, idx) => `S${idx + 1}`), 'Summary', 'End'];
+    const navPills = Array.from({ length: totalSlides }, (_, i) => 
+        `<button class="np${i === 0 ? ' current' : ''}" data-index="${i}" title="Slide ${i + 1}">${String(i + 1).padStart(2, '0')}</button>`
     ).join('');
 
-    // Script panel HTML
+    // Script panel content
     let scriptPanelContent = '';
     if (scriptParts.length > 0) {
         scriptPanelContent = scriptParts.map((part, i) => `
           <div class="script-section" data-slides="${i},${Math.min(i + 1, totalSlides - 1)}">
-            <div class="script-sec-badge">§ ${String(i + 1).padStart(2, '0')}</div>
-            <div style="font-weight:700;margin-bottom:.35rem;">${part.title}</div>
-            <div style="color:var(--ts);white-space:pre-line;">${part.body.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+            <div class="script-sec-badge">§ SLIDE ${String(i + 1).padStart(2, '0')}</div>
+            <div style="font-weight:800;font-size:1rem;color:var(--tp);margin-bottom:.4rem;">${part.title}</div>
+            <div style="color:var(--ts);white-space:pre-line;line-height:1.8;">${part.body.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
           </div>`).join('');
     } else {
-        scriptPanelContent = `<div style="color:var(--ts);padding:1rem;text-align:center;">No script provided for this episode.</div>`;
+        scriptPanelContent = `
+          <div style="color:var(--ts);padding:1.5rem;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:.5rem;">📜</div>
+            <div style="font-weight:700;">No Script Provided</div>
+            <div class="t-xs" style="color:var(--tm);margin-top:.3rem;">You can add presenter notes when creating the presentation.</div>
+          </div>`;
     }
 
     return `<!DOCTYPE html>
@@ -358,7 +648,7 @@ async function generatePresentationHtml(payload) {
     .t-mono{font-family:var(--font-mono);font-size:.82rem;}
     .slide{position:absolute;top:0;left:0;width:100vw;height:100vh;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:calc(var(--s10) + 20px) var(--s6) var(--s12);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 0.5s var(--ease),visibility 0.5s;z-index:1;}
     .slide.active{opacity:1;visibility:visible;pointer-events:auto;z-index:10;}
-    .con{max-width:1080px;width:100%;margin:auto;}
+    .con{max-width:1120px;width:100%;margin:auto;}
     .gc{background:var(--card-bg);border:1px solid var(--border-light);border-radius:var(--r-lg);padding:var(--s8);box-shadow:var(--sh-sm);transition:transform var(--tr),border-color var(--tr),box-shadow var(--tr);}
     .gc:hover{transform:translateY(-2px);border-color:var(--border-med);box-shadow:var(--sh-md);}
     nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:var(--s3) var(--s6);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s2);background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border-light);}
@@ -368,7 +658,7 @@ async function generatePresentationHtml(payload) {
     .np:hover{background:var(--bg-2);color:var(--tp);border-color:var(--border-med);}
     .np.current{background:var(--tool-muted);color:var(--tool);border-color:var(--tool-light);font-weight:700;}
     .nep{font-size:.7rem;color:var(--tm);font-weight:600;}
-    .sh{text-align:center;margin-bottom:var(--s8);}
+    .sh{text-align:center;margin-bottom:var(--s6);}
     .stag{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .75rem;border-radius:var(--r-pill);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--s3);}
     .st-tool{background:var(--tool-muted);color:var(--tool);border:1px solid rgba(2,132,199,0.2);}
     .st-brain{background:var(--brain-muted);color:var(--brain);border:1px solid rgba(124,58,237,0.2);}
@@ -384,6 +674,73 @@ async function generatePresentationHtml(payload) {
     .dc-btn:hover:not(:disabled){background:var(--bg-2);color:var(--tp);}
     .dc-btn:disabled{opacity:.35;cursor:not-allowed;}
     .dc-counter{font-size:.78rem;font-weight:700;color:var(--tm);padding:0 var(--s2);min-width:52px;text-align:center;}
+
+    /* Rich Archetype Styles */
+    .g2-rich { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--s6); align-items: stretch; min-height: 440px; }
+    @media(max-width: 860px) { .g2-rich { grid-template-columns: 1fr; } }
+    
+    .points-container { display: flex; flex-direction: column; gap: var(--s4); justify-content: center; }
+    .points-header { display: flex; align-items: center; gap: .5rem; font-weight: 800; font-size: .95rem; color: var(--tool); margin-bottom: .25rem; }
+    .points-header-icon { font-size: 1.2rem; }
+    .points-list { display: flex; flex-direction: column; gap: var(--s3); }
+    .point-item { display: flex; gap: var(--s3); align-items: flex-start; padding: .65rem .85rem; background: var(--bg-1); border-radius: var(--r-md); border-left: 3px solid var(--tool); transition: all var(--tr); }
+    .point-item:hover { transform: translateX(4px); background: #ffffff; box-shadow: var(--sh-sm); border-color: var(--brain); }
+    .point-bullet { width: 24px; height: 24px; border-radius: var(--r-pill); background: var(--tool-muted); color: var(--tool); font-weight: 800; font-size: .75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: .15rem; }
+    .point-lead { font-weight: 800; color: var(--tp); font-size: .92rem; margin-bottom: .15rem; }
+    .point-desc { color: var(--ts); font-size: .84rem; line-height: 1.6; }
+
+    .visual-container { display: flex; flex-direction: column; justify-content: center; }
+    
+    .mock-window { background: #0f172a; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--r-lg); overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25); color: #f8fafc; }
+    .mock-header { background: #1e293b; padding: .65rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .mock-dots { display: flex; gap: .35rem; }
+    .mock-dot { width: 10px; height: 10px; border-radius: var(--r-pill); }
+    .mock-dot.r { background: #ef4444; } .mock-dot.y { background: #f59e0b; } .mock-dot.g { background: #10b981; }
+    .mock-title { font-family: var(--font-mono); font-size: .7rem; font-weight: 700; color: #94a3b8; letter-spacing: .08em; }
+    .live-pill { font-size: .65rem; font-weight: 800; color: #38bdf8; background: rgba(56,189,248,0.15); padding: .15rem .5rem; border-radius: var(--r-pill); }
+    .mock-body { padding: var(--s5); display: flex; flex-direction: column; justify-content: center; min-height: 280px; }
+    .mock-code-body { padding: var(--s4) var(--s5); font-family: var(--font-mono); font-size: .8rem; line-height: 1.7; color: #cbd5e1; overflow-x: auto; max-height: 360px; }
+    .code-lang-tag { font-family: var(--font-mono); font-size: .65rem; font-weight: 800; color: #a78bfa; background: rgba(167,139,250,0.15); padding: .15rem .5rem; border-radius: var(--r-pill); }
+
+    .flow-track { display: flex; flex-direction: column; gap: var(--s3); }
+    .flow-node { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-md); padding: .65rem 1rem; display: grid; grid-template-columns: auto auto 1fr; gap: .75rem; align-items: center; transition: all var(--tr); }
+    .flow-node:hover { background: rgba(255,255,255,0.12); border-color: #38bdf8; transform: translateY(-2px); }
+    .flow-node-icon { font-size: 1.3rem; }
+    .flow-node-num { font-family: var(--font-mono); font-size: .68rem; font-weight: 800; color: #38bdf8; }
+    .flow-node-name { font-weight: 800; font-size: .88rem; color: #ffffff; }
+    .flow-node-desc { font-size: .78rem; color: #94a3b8; text-align: right; }
+    .flow-connector { text-align: center; color: #38bdf8; font-weight: 800; font-size: 1rem; opacity: .7; line-height: .8; }
+
+    .step-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s3); }
+    .step-card { background: var(--card-bg); border: 1px solid var(--border-light); border-radius: var(--r-md); padding: var(--s4); box-shadow: var(--sh-sm); transition: all var(--tr); display: flex; flex-direction: column; gap: .3rem; }
+    .step-card:hover { transform: translateY(-3px); border-color: var(--tool); box-shadow: var(--sh-md); }
+    .step-card-num { font-family: var(--font-mono); font-size: .72rem; font-weight: 800; color: var(--tool); background: var(--tool-muted); display: inline-block; width: fit-content; padding: .1rem .45rem; border-radius: var(--r-pill); }
+    .step-card-title { font-weight: 800; font-size: .9rem; color: var(--tp); }
+    .step-card-desc { font-size: .8rem; color: var(--ts); line-height: 1.55; }
+
+    .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+    .cmp-card { background: var(--card-bg); border-radius: var(--r-md); padding: var(--s4); box-shadow: var(--sh-sm); display: flex; flex-direction: column; gap: var(--s3); }
+    .cmp-left { border: 1px solid rgba(220,38,38,0.25); background: linear-gradient(180deg, rgba(220,38,38,0.02) 0%, var(--card-bg) 100%); }
+    .cmp-right { border: 2px solid var(--app); background: linear-gradient(180deg, rgba(5,150,105,0.04) 0%, var(--card-bg) 100%); }
+    .cmp-badge-left { font-size: .65rem; font-weight: 800; color: var(--danger); background: var(--danger-m); padding: .15rem .5rem; border-radius: var(--r-pill); display: inline-block; width: fit-content; }
+    .cmp-badge-right { font-size: .65rem; font-weight: 800; color: var(--app); background: var(--app-muted); padding: .15rem .5rem; border-radius: var(--r-pill); display: inline-block; width: fit-content; }
+    .cmp-title { font-weight: 800; font-size: .92rem; color: var(--tp); margin-top: .2rem; }
+    .cmp-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .4rem; font-size: .8rem; color: var(--ts); }
+
+    .breakdown-grid { display: flex; flex-direction: column; gap: var(--s3); }
+    .feature-box { padding: var(--s4); border-radius: var(--r-md); background: var(--card-bg); border: 1px solid var(--border-light); box-shadow: var(--sh-sm); transition: all var(--tr); }
+    .feature-box:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
+    .feat-blue { border-right: 4px solid var(--tool); }
+    .feat-purple { border-right: 4px solid var(--brain); }
+    .feat-green { border-right: 4px solid var(--app); }
+    .feat-icon { font-size: 1.4rem; margin-bottom: .2rem; }
+    .feat-title { font-weight: 800; font-size: .92rem; color: var(--tp); }
+    .feat-desc { font-size: .82rem; color: var(--ts); line-height: 1.6; }
+
+    .btn-primary-action { background: linear-gradient(135deg, var(--tool) 0%, #0284c7 100%); color: #ffffff; border: none; padding: .65rem 1.6rem; border-radius: var(--r-pill); font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 800; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(2,132,199,0.3); transition: all var(--tr); }
+    .btn-primary-action:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -3px rgba(2,132,199,0.4); }
+    .tag-pill { font-size: .68rem; font-weight: 800; padding: .2rem .6rem; border-radius: var(--r-pill); display: inline-block; }
+
     .script-panel{position:fixed;top:0;right:0;width:380px;max-width:90vw;height:100vh;background:var(--bg);border-left:1px solid var(--border-med);z-index:200;transform:translateX(105%);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);display:flex;flex-direction:column;user-select:text;}
     .script-panel.open{transform:translateX(0);}
     .script-header{padding:.9rem 1.25rem;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;background:var(--bg-1);}
